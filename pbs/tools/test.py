@@ -15,5 +15,6 @@ A=pbs_tools.pbs_tools();
 #A.pestat()
 #print A.job_table()
 #print A.qstat()
-print A.table['job']
+#print A.table['pbsnodes']
+print A.table['platform']
 #print A.pbsnodes_table

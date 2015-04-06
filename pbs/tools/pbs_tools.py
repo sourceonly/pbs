@@ -15,8 +15,11 @@ class pbs_tools():
 		self.table['pbsnodes']=self.get_node_table();
 		self.sep=';'
 		self.pestat_default=['Mom','state','resources_available.pas_applications_enabled','resources_available.platform','resources_available.ncpus','resources_assigned.ncpus','resources_available.mem','resources_assigned.mem','jobs']
-
+		self.jobinfo_default=['Job_Name','Job_Owner']
 		self.table['job']=self.get_job_table();
+                self.table['platform']=self.get_platform_table();
+
+                
 	def set_pbs_env(self):
 		f=open("/etc/pbs.conf","w");
 		for i in f.readlines(): 
@@ -72,13 +75,12 @@ class pbs_tools():
 			content+='\n'
 		print content
 		return ;
-	def get_job_table (self): 
+	def get_job_table (self,args='-f'): 
 		qstat_f={};
 		jobid_reg=re.compile("^Job Id");
 		res_reg=re.compile("\s+([^=]+)=(.+)");
-		qstat_out,qstat_err=self.qstat();
+		qstat_out,qstat_err=self.qstat(args);
 		current_id="";
-		print qstat_out
 		for i in qstat_out.split('\n'):
 			id_match=jobid_reg.search(i);
 			if id_match: 
@@ -92,3 +94,45 @@ class pbs_tools():
 					value=res_match.group(2).strip(' ').split(',');
 					qstat_f[current_jobid][key]=value;
 		return qstat_f
+	def get_platform_table(self): 
+		node_table=self.table['pbsnodes'];
+                platform={};
+                for i in node_table.keys():
+                        if not node_table[i].has_key("resources_available.platform"):
+                                continue
+                        
+                        for j in node_table[i]["resources_available.platform"]:
+                                if not platform.has_key(j):
+
+                                        platform[j]={};
+                                        platform[j]['total']=0;
+                                        platform[j]['used']=0;
+                                        platform[j]['free']=0;
+
+                                if node_table[i].has_key("resources_available.ncpus"):
+                                        node_cpu_total=int(node_table[i]["resources_available.ncpus"][0]);
+                                else :
+                                        node_cpu_total=0;
+                                if node_table[i].has_key("resources_assigned.ncpus"):
+                                        node_cpu_assign=int(node_table[i]["resources_assigned.ncpus"][0]);
+                                else :
+                                        node_cpu_assign=0;
+                                                
+                                platform[j]['total']+=node_cpu_total;
+                                platform[j]['used']+=node_cpu_assign;
+                                platform[j]['free']+=platform[j]['total']-platform[j]['used'];
+
+                                       
+
+
+                return platform
+
+
+
+
+class license():
+        def __init__ (self) :
+                self.lmstat='/usr/local/bin/lmstat'
+                self.lmxendutils='/usr/local/bin/lmxutils'
+        def check_lm_lic(self, target) :
+                pass

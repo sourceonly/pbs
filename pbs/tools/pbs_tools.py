@@ -5,8 +5,10 @@ import sys;
 import os;
 import subprocess
 import re;
-
-
+try: 
+	import RefreshUtils
+except: 	
+	pass
 
 class pbs_tools(): 
 	def __init__ (self):
@@ -127,8 +129,59 @@ class pbs_tools():
 
                 return platform
 
+	def get_app_platform(self, apps, match_key="resources_available.pas_applications_enabled", platform_key="resources_available.platform"): 
+		table=self.table['pbsnodes']; 
+		platform_list=[];
+		for node in table.keys() : 
+			if table[node].has_key(match_key) : 
+				if apps in table[node][match_key]: 
+					if table[node].has_key(platform_key): 
+						platform_list+=table[node][platform_key];
+		return platform_list;
+	def get_platform_status (self, list=[] ): 
+		platform_list=self.table['platform'];
+		if len(list)==0: 
+			list=platform_list.keys();
+		valid_keys=[ var for var in list if var in platform_list.keys()	] ;
+		platform_info=[];
+		for key in valid_keys :  
+			platform_string="%-20s ( used: %6d | free: %6d | total: %6d ) "	 % ( key, platform_list[key]['used'],platform_list[key]['free'], platform_list[key]['total'])
+			platform_info.append(platform_string);
+		return platform_info;
+			
+		
+				
 
+class RefreshModule() : 
+	def __init__ (self, applicationArgs, refreshSourceName) :  
+		self.applicationArgs=applicationArgs;
+		self.refreshSourceName=refreshSourceName;
+		return 
+        def create_platform (self) :
+                Debug = True
+                if (Debug == True):
+                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
+                        
+                else:
+                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
+                        
+                try:
+                        refreshUtils.deleteApplicationArg("PLATFORM");
+                except:
+                        pass
 
+                A=pbs_tools();
+                available_platform=A.get_app_platform('Optistruct');
+                options=A.get_platform_status(available_platform); 
+                newArg = refreshUtils.createArgumentStringEnum("PLATFORM", options,  options[0], options[0], "platform", "platform", True, False)
+                refreshUtils.addApplicationArg(newArg, 3);
+                return None;
+	def strip_platform(self,string) : 
+		reg_platform=re.compile("[A-Za-z0-9\-]+");
+		reg_match=reg_platform.search(string);
+		if reg_match: 
+			return reg_match.group(0);	
+		return None;
 
 class license():
         def __init__ (self) :

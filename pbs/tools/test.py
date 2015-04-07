@@ -16,5 +16,13 @@ A=pbs_tools.pbs_tools();
 #print A.job_table()
 #print A.qstat()
 #print A.table['pbsnodes']
-print A.table['platform']
+#print A.table['platform']
+platform=A.get_app_platform("Optistruct")
+print A.get_platform_status(platform);
+
+
+B=pbs_tools.RefreshModule('a','b');
+
+print B.strip_platform(A.get_platform_status(platform)[0]);
+
 #print A.pbsnodes_table

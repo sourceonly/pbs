@@ -197,14 +197,19 @@ class RefreshModule() :
 		job_name=refreshUtils.getValue('JOB_NAME');
 		if job_name  : 	
 			return 
-		master=refreshUtils.getValue('MASTER').split("/")[-1].split(".")[0];
+		master_list=refreshUtils.getValue('MASTER').split("/")[-1].split(".")
+		if len(master_list[0]) > 0  : 
+			master=master_list[0]
+		else : 
+			master='job_default'
+	
 		job_name_node=self.get_node("JOB_NAME");
 		f=open("/tmp/abc","w");
 		f.write(str(job_name));
 		f.write(master);
 		f.close();
 		if job_name_node : 
-			job_name_node.setName(master);
+			job_name_node.setValue(master);
 		
 	def get_node (self, nodename) : 
 		for i in self.applicationArgs: 

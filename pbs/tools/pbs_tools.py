@@ -201,7 +201,7 @@ class RefreshModule() :
 		if len(master_list[0]) > 0  : 
 			master=master_list[0]
 		else : 
-			master='job_default'
+			master=re.sub(r"\.","_",master_list);
 	
 		job_name_node=self.get_node("JOB_NAME");
 		f=open("/tmp/abc","w");

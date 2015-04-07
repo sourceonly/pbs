@@ -183,6 +183,35 @@ class RefreshModule() :
 			return reg_match.group(0);	
 		return None;
 
+	def refresh_jobname (self):  
+                Debug = True
+                if (Debug == True):
+                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
+                        
+                else:
+                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
+                        
+		if not self.refreshSourceName == 'MASTER' : 
+			return ;
+		
+		job_name=refreshUtils.getValue('JOB_NAME');
+		if job_name  : 	
+			return 
+		master=refreshUtils.getValue('MASTER').split("/")[-1].split(".")[0];
+		job_name_node=self.get_node("JOB_NAME");
+		f=open("/tmp/abc","w");
+		f.write(str(job_name));
+		f.write(master);
+		f.close();
+		if job_name_node : 
+			job_name_node.setName(master);
+		
+	def get_node (self, nodename) : 
+		for i in self.applicationArgs: 
+			if i.name == nodename : 
+				return i;
+	
+			
 class license():
         def __init__ (self) :
                 self.lmstat='/usr/local/bin/lmstat'

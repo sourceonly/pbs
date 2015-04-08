@@ -157,7 +157,7 @@ class RefreshModule() :
 		self.applicationArgs=applicationArgs;
 		self.refreshSourceName=refreshSourceName;
 		return 
-        def create_platform (self) :
+        def create_platform (self,apps='Optistruct',platform='PLATFORM') :
                 Debug = True
                 if (Debug == True):
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
@@ -166,15 +166,17 @@ class RefreshModule() :
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
                         
                 try:
-                        refreshUtils.deleteApplicationArg("PLATFORM");
+                        refreshUtils.deleteApplicationArg(platform);
                 except:
                         pass
 
                 A=pbs_tools();
-                available_platform=A.get_app_platform('Optistruct');
+                available_platform=A.get_app_platform(apps);
                 options=A.get_platform_status(available_platform); 
-                newArg = refreshUtils.createArgumentStringEnum("PLATFORM", options,  options[0], options[0], "platform", "platform", True, False)
-                refreshUtils.addApplicationArg(newArg, 3);
+		if len(options) > 0 : 
+                	newArg = refreshUtils.createArgumentStringEnum(platform, options,  options[0], options[0], platform, platform, True, False)
+                	refreshUtils.addApplicationArg(newArg, 3);
+			return newArg
                 return None;
 	def strip_platform(self,string) : 
 		reg_platform=re.compile("[A-Za-z0-9\-]+");
@@ -183,7 +185,7 @@ class RefreshModule() :
 			return reg_match.group(0);	
 		return None;
 
-	def refresh_jobname (self):  
+	def refresh_jobname(self,jobname='JOB_NAME',file='MASTER'):  
                 Debug = True
                 if (Debug == True):
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
@@ -191,23 +193,19 @@ class RefreshModule() :
                 else:
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
                         
-		if not self.refreshSourceName == 'MASTER' : 
+		if not self.refreshSourceName == file: 
 			return ;
 		
-		job_name=refreshUtils.getValue('JOB_NAME');
+		job_name=refreshUtils.getValue(jobname);
 		if job_name  : 	
 			return 
-		master_list=refreshUtils.getValue('MASTER').split("/")[-1].split(".")
+		master_list=refreshUtils.getValue(file).split("/")[-1].split(".")
 		if len(master_list[0]) > 0  : 
 			master=master_list[0]
 		else : 
 			master=re.sub(r"\.","_","_".join(master_list));
 	
-		job_name_node=self.get_node("JOB_NAME");
-		f=open("/tmp/abc","w");
-		f.write(str(job_name));
-		f.write(master);
-		f.close();
+		job_name_node=self.get_node(jobname);
 		if job_name_node : 
 			job_name_node.setValue(master);
 		

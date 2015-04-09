@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput
+
+    xmlns="http://schemas.altair.com/pbs/2007/02/app-def"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+    <ApplicationId>GlxSpheres</ApplicationId>
+    <ApplicationName>GlxSpheres</ApplicationName>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>JOB_NAME</Name>
+            <Description>The name of the job.</Description>
+            <DisplayName>Job Name</DisplayName>
+            <InputRequired>true</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <!-- Helper to view DM aware apps; One option is to let PAS consider this as reserved syntax and also validate --> 	
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>DM_APP</Name>
+            <Description>Identifier for DM app.</Description>
+            <DisplayName>DM App</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <!-- Helper to view versions of DM aware apps -->
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>VERSION</Name>
+            <Description>Version of the interactive application you selected to start</Description>
+            <DisplayName>Version</DisplayName>
+            <xi:include href="site-config.xml" xpointer="xpath1(//Application[@id='GlxSpheres']/ApplicationVersions//Option)" />
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>DM_APP_GEOMETRY</Name>
+            <Description>Geometry of the interactive application you selected to start</Description>
+            <DisplayName>Application Geometry</DisplayName>
+            <InputRequired>false</InputRequired>
+            <Option default="true">1024x760</Option>
+            <Option>1280x960</Option>
+            <Option>1280x1024</Option>
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentInt>
+            <Name>NCPUS</Name>
+            <Description>The number of CPUs to request.</Description>
+            <DisplayName>nCPU</DisplayName>
+            <InputRequired>false</InputRequired>
+            <Value>1</Value>
+        </ArgumentInt>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentInt>
+            <Name>MEMORY</Name>
+            <Description>Memory (MB)</Description>
+            <DisplayName>Memory</DisplayName>
+            <InputRequired>false</InputRequired>
+            <LowerBound>100</LowerBound>
+            <UpperBound>1000</UpperBound>
+            <Value>256</Value> 		
+        </ArgumentInt>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+	<ArgumentBooleanWithDescription>
+            <Name>GPU</Name>
+            <Description>Is GPU required ?</Description>
+            <DisplayName>GPU(?)</DisplayName>
+            <InputRequired>false</InputRequired>
+            <FeatureEnabled>true</FeatureEnabled>
+	</ArgumentBooleanWithDescription>
+    </ArgumentChoice>
+
+</TemplateApplicationInput>

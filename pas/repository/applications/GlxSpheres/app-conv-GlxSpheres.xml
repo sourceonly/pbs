@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationConverter
+    
+    xmlns="http://schemas.altair.com/pbs/2007/02/app-conv"
+    xmlns:app-def="http://schemas.altair.com/pbs/2007/02/app-def"
+    xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl"
+    xmlns:jsdl-hpcp="http://schemas.ggf.org/jsdl/2006/07/jsdl-hpcp"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <ApplicationId>GlxSpheres</ApplicationId>
+    <ApplicationName>GlxSpheres</ApplicationName>
+    
+    <HPCProfileApplication>
+
+        <jsdl-hpcp:Executable>$PYTHONPATH</jsdl-hpcp:Executable>
+	<jsdl-hpcp:Argument>runtime/iJobStart.py</jsdl-hpcp:Argument>
+
+	<jsdl-hpcp:Environment name="DM_JOB">True</jsdl-hpcp:Environment>
+	<jsdl-hpcp:Environment name="DM_APP_MGR">VGL</jsdl-hpcp:Environment>
+	<jsdl-hpcp:Environment name="DM_SESSION_MGR">TurboVNC</jsdl-hpcp:Environment>
+	<jsdl-hpcp:Environment name="PBS_PYTHON_PATH">$PYTHONPATH</jsdl-hpcp:Environment>
+        <jsdl-hpcp:Environment name="VERSION">$VERSION</jsdl-hpcp:Environment>
+    </HPCProfileApplication>
+
+    <jsdl:Resources>
+        <TotalCPUCount>
+            <Exact>$NCPUS</Exact>
+        </TotalCPUCount>
+        <CustomResource>
+	    <Name>ngpus</Name>	
+            <Value>converterIf($GPU?1)</Value>
+        </CustomResource>
+        <TotalPhysicalMemory>
+            <Exact>$MEMORY</Exact>
+        </TotalPhysicalMemory>
+    </jsdl:Resources>
+
+</TemplateApplicationConverter>
+

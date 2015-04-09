@@ -1,0 +1,22 @@
+#!/bin/bash -x 
+if [ "$PAS_REPORT" == "no" ] 
+then 
+exit 0
+fi
+
+cp ./runtime/report.temp .
+cp ./runtime/b.tcl .
+
+h3dfile=`ls | grep h3d | head -1`
+
+cp ./runtime/test.png .
+sed -i "s/@filename@/$h3dfile/g" b.tcl
+export DISPLAY=:0.0
+export LMX_LICENSE_PATH=6200@192.168.40.68
+/data/apps/hw13.0.110.24/altair/scripts/hv -b -tcl b.tcl
+sleep 10
+pdflatex report.temp
+pdflatex report.temp
+pdflatex report.temp
+
+

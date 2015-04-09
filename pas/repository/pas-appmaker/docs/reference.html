@@ -1,0 +1,1533 @@
+<h1>pas-appmaker/docs/reference</h1>
+
+<p>A framework for creating powerful application definitions.</p>
+
+<h2>Introduction</h2>
+
+<p>This document will serve as a reference for pas-appmaker authors who wish to know more about some of the special behaviors of pas-appmaker.</p>
+
+<h2>Configuration Options</h2>
+
+<p>The following pas-appmaker command options are available for getting command help, setting up the pas-app environment, and changing application files permissions and ownership.</p>
+
+<h3>--app-home</h3>
+
+<p>This command option sets the application's home directory. Alternatively, you can set this option in your environment using the UNIX export command:</p>
+
+<pre><code>export PAS_APP_HOME=/var/spool/pas/repository/applications
+</code></pre>
+
+<h4>Example</h4>
+
+<pre><code>pas-appmaker MyApp --app-home /var/spool/pas/repository/applications
+</code></pre>
+
+<h3>--app-config</h3>
+
+<p>This command option sets the application's configuration directory. Alternatively, this option can be set in your environment using the UNIX export command:</p>
+
+<pre><code>export PAS_APP_CONFIG=/var/spool/pas/repository/pas-appmaker/config
+</code></pre>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --app-config /var/spool/pas/repository/pas-appmaker/config/
+</code></pre>
+
+<h3>--app-chmod</h3>
+
+<p>This command option changes the permissions of all application files. It is similiar to the UNIX chmod command:</p>
+
+<pre><code>chmod -R &lt;permissions&gt; /var/spool/pas/repository/applications/MyApp
+</code></pre>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --app-chmod 0755
+</code></pre>
+
+<h3>--app-chown</h3>
+
+<p>This command option changes the ownership of all application files. It is similar to issuing the command:</p>
+
+<pre><code>chown -R &lt;owner:group&gt; /var/spool/pas/repository/applications/MyApp
+</code></pre>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --app-chown 50005:100
+</code></pre>
+
+<p>or</p>
+
+<pre><code>pas-appmaker MyApp --app-chown `id -u username`:`id -g groupname`
+</code></pre>
+
+<h2>Resource Options</h2>
+
+<p>The following pas-appmaker command options are available for presenting application arguments that can be used for requesting job resources.  </p>
+
+<h3>--resources</h3>
+
+<p>This command option creates an applicationargument that allows job resources to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --resources
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;RESOURCES&lt;/Name&gt;
+        &lt;Description&gt;Specify your -l resource requests here.&lt;/Description&gt;
+        &lt;DisplayName&gt;Resources&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Value&gt;software=Appname select=1:ncpus=1:mem=100mb&lt;/Value&gt;
+    &lt;ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --resources behind the scenes in the Submit Phase of your application. This will not generate any XML, and as such, will not expose this option to any submitting users.</p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_RESOURCES='software=MyApp select=1:ncpus=1'
+</code></pre>
+
+<h3>--select</h3>
+
+<p>This command option creates an application argument that allows chunks to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --select
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentInt&gt;
+        &lt;Name&gt;SELECT&lt;/Name&gt;
+        &lt;Description&gt;The number of chunks (nodes)&lt;/Description&gt;
+        &lt;DisplayName&gt;Select (Nodes/Chunks)&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;LowerBound&gt;1&lt;/LowerBound&gt;
+        &lt;UpperBound&gt;256&lt;/UpperBound&gt;
+        &lt;Value&gt;1&lt;/Value&gt;
+    &lt;/ArgumentInt&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --select behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_SELECT=1
+</code></pre>
+
+<h3>--ncpus</h3>
+
+<p>This command option presents an application argument that allows the number of CPUs to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --ncpus
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentIntEnumerated&gt;
+        &lt;Name&gt;NCPUS&lt;/Name&gt;
+        &lt;Description&gt;The total number of processors.&lt;/Description&gt;
+        &lt;DisplayName&gt;Number of Processors&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Option default="true"&gt;2&lt;/Option&gt;
+        &lt;Option&gt;4&lt;/Option&gt;
+        &lt;Option&gt;6&lt;/Option&gt;
+        &lt;Option&gt;8&lt;/Option&gt;
+        &lt;Option&gt;10&lt;/Option&gt;
+        &lt;Option&gt;12&lt;/Option&gt;
+    &lt;/ArgumentIntEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --ncpus behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_NCPUS=2
+</code></pre>
+
+<h3>--ngpus</h3>
+
+<p>This command option generates an application argument that allows the number of graphical CPUs to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --ngpus
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentIntEnumerated&gt;
+      &lt;Name&gt;NGPUS&lt;/Name&gt;
+      &lt;Description&gt;The total number of graphical processors.&lt;/Description&gt;
+      &lt;DisplayName&gt;Number of Graphical Processors&lt;/DisplayName&gt;
+      &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+      &lt;Option default="true"&gt;2&lt;/Option&gt;
+      &lt;Option&gt;4&lt;/Option&gt;
+      &lt;Option&gt;6&lt;/Option&gt;
+      &lt;Option&gt;8&lt;/Option&gt;
+      &lt;Option&gt;10&lt;/Option&gt;
+      &lt;Option&gt;12&lt;/Option&gt;
+    &lt;/ArgumentIntEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --ngpus behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_NGPUS=1
+</code></pre>
+
+<h3>--mpiprocs</h3>
+
+<p>This command option creates an application argument that allows the number of MPI processes per chunk to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --mpiprocs
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentIntEnumerated&gt;
+      &lt;Name&gt;MPIPROCS&lt;/Name&gt;
+      &lt;Description&gt;The total number of parallel processes.&lt;/Description&gt;
+      &lt;DisplayName&gt;MPI Processors&lt;/DisplayName&gt;
+      &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+      &lt;Option default="true"&gt;2&lt;/Option&gt;
+      &lt;Option&gt;4&lt;/Option&gt;
+      &lt;Option&gt;6&lt;/Option&gt;
+      &lt;Option&gt;8&lt;/Option&gt;
+      &lt;Option&gt;10&lt;/Option&gt;
+      &lt;Option&gt;12&lt;/Option&gt;
+    &lt;/ArgumentIntEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --mpiprocs behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_MPIPROCS=2
+</code></pre>
+
+<h3>--ompthreads</h3>
+
+<p>This command option creates an application argument that allows the number of OpenMP threads for this chunk to be requested at job submission time.</p>
+
+<h3>Examples</h3>
+
+<pre><code>pas-appmaker MyApp --ompthreads
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentIntEnumerated&gt;
+        &lt;Name&gt;OMPTHREADS&lt;/Name&gt;
+        &lt;Description&gt;The total number of parallel processes.&lt;/Description&gt;
+        &lt;DisplayName&gt;OMP Threads&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Option default="true"&gt;2&lt;/Option&gt;
+        &lt;Option&gt;4&lt;/Option&gt;
+        &lt;Option&gt;6&lt;/Option&gt;
+        &lt;Option&gt;8&lt;/Option&gt;
+        &lt;Option&gt;10&lt;/Option&gt;
+        &lt;Option&gt;12&lt;/Option&gt;
+    &lt;/ArgumentIntEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --mpiprocs behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_OMPTHREADS=4
+</code></pre>
+
+<h3>--mem</h3>
+
+<p>This command option creates an application argument that allows the amount of physical memory per chunk to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --mem
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;MEM&lt;/Name&gt;
+        &lt;Description&gt;The physical memory to request. You will need to specify the unit type.&lt;/Description&gt;
+        &lt;DisplayName&gt;Physical Memory&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Value&gt;1gb&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --mem behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_MEM=16gb
+</code></pre>
+
+<h3>--vmem</h3>
+
+<p>This command option creates an application argument that allows the amount of virtual memory per chunk to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --vmem
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;VMEM&lt;/Name&gt;
+        &lt;Description&gt;The virtual memory to use. You will need to specify the unit type.&lt;/Description&gt;
+        &lt;DisplayName&gt;Virtual Memory&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Value&gt;100mb&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --vmem behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_VMEM=4gb
+</code></pre>
+
+<h3>--walltime</h3>
+
+<p>This command option creates an application argument that allows the walltime to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --walltime
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;WALLTIME&lt;/Name&gt;
+        &lt;Description&gt;The desired walltime (length) of the job duration.&lt;/Description&gt;
+        &lt;DisplayName&gt;Walltime&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;Value&gt;01:00:00&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --arch behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_WALLTIME=01:00:00
+</code></pre>
+
+<h3>--arch</h3>
+
+<p>This command option creates an application argument that allows the system architecture to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --arch
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;ARCH&lt;/Name&gt;
+        &lt;Description&gt;Specify which system architecture to run your job on.&lt;/Description&gt;
+        &lt;DisplayName&gt;Architecture&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --arch behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_ARCH=linux
+</code></pre>
+
+<h3>--vnode</h3>
+
+<p>This command option creates an application argument that allows the virtual node to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --vnode
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;VNODE&lt;/Name&gt;
+        &lt;Description&gt;Specify which vnode you would like to run this job on.&lt;/Description&gt;
+        &lt;DisplayName&gt;VNode&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --arch behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_VNODE=hostname
+</code></pre>
+
+<h3>--place</h3>
+
+<p>This command option creates an application argument that allows the placement of each chunk to be requested at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --place
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringEnumerated&gt;
+        &lt;Name&gt;PLACE&lt;/Name&gt;
+        &lt;Description&gt;The placement of job resources.&lt;/Description&gt;
+        &lt;DisplayName&gt;Placement of Resources&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;Option default="true"&gt;pack&lt;/Option&gt;
+        &lt;Option&gt;free&lt;/Option&gt;
+        &lt;Option&gt;scatter&lt;/Option&gt;
+        &lt;Option&gt;shared&lt;/Option&gt;
+    &lt;/ArgumentStringEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --arch behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_PLACE=skatter
+</code></pre>
+
+<h2>Attribute Options</h2>
+
+<p>The following pas-appmaker command options are available for creating application arguments that can be used for specifying job attributes.  </p>
+
+<h3>--attributes</h3>
+
+<p>This command option creates an application argument that allows job attributes or characteristics to be set.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --attributes
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;ATTRIBUTES&lt;/Name&gt;
+        &lt;Description&gt;Automatically include any of these ':' separated list of key/value attribute pairs.&lt;/Description&gt;
+        &lt;DisplayName&gt;Attributes&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Value&gt;group_list=user@hostname&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --attributes behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_ATTRIBUTES=group_list=user@hostname
+</code></pre>
+
+<h3>--depend</h3>
+
+<p>This command option creates an application argument that allows job dependencies to be specified.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --depend
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;DEPEND&lt;/Name&gt;
+        &lt;Description&gt;Specify which job ID this job will depend on and how.&lt;/Description&gt;
+        &lt;DisplayName&gt;Dependancy&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --depend behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_DEPEND=
+</code></pre>
+
+<h3>--group-list</h3>
+
+<p>This command option creates an application argument that specifies the groups under which the job will run.</p>
+
+<h4>Example</h4>
+
+<pre><code>pas-appmaker MyApp --group-list
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;GROUP_LIST&lt;/Name&gt;
+        &lt;Description&gt;Automatically include any of these ',' separted list of groups to run under this job.&lt;/Description&gt;
+        &lt;DisplayName&gt;Group List&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --group-list behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_GROUP_LIST=group1,group2,group3
+</code></pre>
+
+<h3>--account</h3>
+
+<p>This command option creates an application argument that specifies the account under which the job will run.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --account
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;ACCOUNT&lt;/Name&gt;
+        &lt;Description&gt;Specify the name of an account to associate with this job.&lt;/Description&gt;
+        &lt;DisplayName&gt;Account&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --account behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_ACCOUNT=account_name
+</code></pre>
+
+<h3>--project</h3>
+
+<p>This command option creates an application argument that assigns a project to the job at job submission time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --project
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;PROJECT&lt;/Name&gt;
+        &lt;Description&gt;Specify the name to associate with this job.&lt;/Description&gt;
+        &lt;DisplayName&gt;Project&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --project behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_PROJECT=project_name
+</code></pre>
+
+<h3>--queue</h3>
+
+<p>This command option creates an application argument that specifies the queue to which the job will be submitted.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --queue
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringEnumerated&gt;
+        &lt;Name&gt;QUEUE&lt;/Name&gt;
+        &lt;Description&gt;Specify your desired queue.&lt;/Description&gt;
+        &lt;DisplayName&gt;Queue&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;Option&gt;workq&lt;/Option&gt;
+    &lt;/ArgumentStringEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --queue behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_QUEUE=workq
+</code></pre>
+
+<h3>--mail</h3>
+
+<p>This command option creates two application arguments: <br />
+1. The first application argument allows the recipients of the mail to be defined. <br />
+2. The second application argument is list that determines when the email should be sent: <br />
+    * No mail is sent. <br />
+    * Mail sent at the beginning of the job. <br />
+    * Mail sent at the end of the job. <br />
+    * Mail sent when the job aborts.    </p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --mail
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringMulti&gt;
+        &lt;Name&gt;MAIL_EMAILS&lt;/Name&gt;
+        &lt;Description&gt;A ';' separated list of email addresses to send notifications to. Example: sam@altair.com;bill@altair.com&lt;/Description&gt;
+        &lt;DisplayName&gt;Email Notifications&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentStringMulti&gt;
+&lt;/ArgumentChoice&gt;
+&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringEnumerated&gt;
+        &lt;Name&gt;MAIL_OPTIONS&lt;/Name&gt;
+        &lt;Description&gt;Select when you would like to be notified of job activity. Either 'a' if the job has aborted, 'b' for before the job starts or 'e' when the job exits. Example: 'abe'.&lt;/Description&gt;
+        &lt;DisplayName&gt;Notification Options&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Option default="true"&gt;No mail is sent&lt;/Option&gt;
+        &lt;Option&gt;Mail sent at beginning of job&lt;/Option&gt;
+        &lt;Option&gt;Mail sent at end of job&lt;/Option&gt;
+        &lt;Option&gt;Mail sent on job abort&lt;/Option&gt;
+    &lt;/ArgumentStringEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --queue behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example. </p>
+
+<pre><code>pas-appmaker MyApp --submit-environment "PAS_MAIL_EMAILS=user@domain.com,PAS_MAIL_OPTIONS=abe"
+</code></pre>
+
+<h3>--job-arrays</h3>
+
+<p>This option allows a job array to be created.  Three application arguments allow the user to specify the start, end and index of the array and a stepping factor.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --job-arrays
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentInt&gt;
+        &lt;Name&gt;JOB_ARRAY_START_INDEX&lt;/Name&gt;
+        &lt;Description&gt;The start index of a job array.&lt;/Description&gt;
+        &lt;DisplayName&gt;Job Array Start Index&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;LowerBound&gt;0&lt;/LowerBound&gt;
+        &lt;Value&gt;0&lt;/Value&gt;
+    &lt;/ArgumentInt&gt;
+&lt;/ArgumentChoice&gt;
+&lt;ArgumentChoice&gt;
+    &lt;ArgumentInt&gt;
+        &lt;Name&gt;JOB_ARRAY_END_INDEX&lt;/Name&gt;
+        &lt;Description&gt;The end index of a job array.&lt;/Description&gt;
+        &lt;DisplayName&gt;Job Array End Index&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;LowerBound&gt;1&lt;/LowerBound&gt;
+        &lt;Value&gt;1&lt;/Value&gt;
+    &lt;/ArgumentInt&gt;
+&lt;/ArgumentChoice&gt;
+&lt;ArgumentChoice&gt;
+    &lt;ArgumentInt&gt;
+        &lt;Name&gt;JOB_ARRAY_STEPPING_FACTOR&lt;/Name&gt;
+        &lt;Description&gt;The stepping factor of job array.&lt;/Description&gt;
+        &lt;DisplayName&gt;Job Array Stepping Factor&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;LowerBound&gt;1&lt;/LowerBound&gt;
+        &lt;Value&gt;1&lt;/Value&gt;
+    &lt;/ArgumentInt&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<h2>Execution Options</h2>
+
+<p>The following pas-appmaker command options are available for setting aspects of the application specific to the executable, its arguments, and other related "Solver" specific options.</p>
+
+<h3>--software</h3>
+
+<p>This command option creates an application argument which allows you to specify the name of the software associated with the application being created.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --software
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;SOFTWARE&lt;/Name&gt;
+        &lt;Description&gt;The name of your application.&lt;/Description&gt;
+        &lt;DisplayName&gt;Software&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;Value&gt;AppMaker&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --software behind the scenes in the Submit Phase of your application. This will not expose the option to a submitting user as in the above example.</p>
+
+<pre><code>pas-appmaker MyApp --submit-environment PAS_SOFTWARE=SolverName
+</code></pre>
+
+<h3>--environment</h3>
+
+<p>This command option creates an application argument that allows environment variables to be exported to the job.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --environment
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringMulti&gt;
+        &lt;Name&gt;ENVIRONMENT&lt;/Name&gt;
+        &lt;Description&gt;A ';' separated list of environment variables to make available to the AppMaker job.&lt;/Description&gt;
+        &lt;DisplayName&gt;AppMaker Environment&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentStringMulti&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --environment behind the scenes in the Start Phase of your application. This will not expose the option to a submitting user as in the above example.</p>
+
+<pre><code>pas-appmaker MyApp --start-environment PAS_ENVIRONMENT=VAR_1=foo,VAR_2=bar,VAR_3=baz
+</code></pre>
+
+<h3>--executable</h3>
+
+<p>This command option creates an application argument that allows an executable to be specified for job execution.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --executable
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;EXECUTABLE&lt;/Name&gt;
+        &lt;Description&gt;A remote executable to run instead of a user supplied job script.&lt;/Description&gt;
+        &lt;DisplayName&gt;Executable&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Value&gt;&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --executable behind the scenes in the Start Phase of your application. This will not expose the option to a submitting user as in the above example.</p>
+
+<pre><code>pas-appmaker MyApp --start-environment PAS_EXECUTABLE=/path/to/executable
+</code></pre>
+
+<h3>--script</h3>
+
+<p>This command option creates an application argument that specifies a specific job script to execute at run time.</p>
+
+<h4>Examples</h4>
+
+<pre><code>pas-appmaker MyApp --script
+</code></pre>
+
+<p>This option will create the appropriate XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-inp.xml</code>.</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;SCRIPT&lt;/Name&gt;
+        &lt;Description&gt;A job script to run instead of a remote executable.&lt;/Description&gt;
+        &lt;DisplayName&gt;Job Script&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create the appropriate data staging XML required for your application definition. It will create XML output similiar to what you see below within <code>$PAS_APP_HOME/MyApp/app-MyApp-conv.xml</code>.</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($SCRIPT)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$SCRIPT&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>Alternatively, you can set a value to --script behind the scenes in the Start Phase of your application. This will not expose the option to a submitting user as in the above example.</p>
+
+<pre><code>pas-appmaker MyApp --start-environment PAS_SCRIPT=/path/to/script
+</code></pre>
+
+<h3>--arguments</h3>
+
+<p>This command option creates an application argument that allows arguments to be passed to an executable or script.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --arguments</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;ARGUMENTS&lt;/Name&gt;
+        &lt;Description&gt;Pass specific arguments to the job script or remote executable.&lt;/Description&gt;
+        &lt;DisplayName&gt;Arguments&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Value&gt;&lt;/Value&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a string argument called <strong>Arguments</strong> will be available. This argument can be used to pass arguments to an executable.</p>
+
+<h3>--run-parallel</h3>
+
+<p>This command option creates an application argument that allows the user to choose to run the executable or script in parallel across all nodes.     </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp b-run-parallel</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentBooleanWithDescription&gt;
+        &lt;Name&gt;RUN_PARALLEL&lt;/Name&gt;
+        &lt;Description&gt;Run your Executable and Script in parallel across all nodes.&lt;/Description&gt;
+        &lt;DisplayName&gt;Run Parallel&lt;/DisplayName&gt;
+        &lt;FeatureEnabled&gt;true&lt;/FeatureEnabled&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentBooleanWithDescription&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a boolean argument called <strong>Run Parallel</strong> will be available. This argument will be displayed as a checkbox and by default will be enabled.  This argument allows a user to choose to run the executable in parallel.</p>
+
+<h2>Attach and Process Job Files</h2>
+
+<p>The following pas-appmaker command options are available for creating application input arguments for different types of files. <br />
+--input-file ------------------- Create an input file argument <br />
+--input-file-array ----------- Create an input file argument for each job array index <br />
+--master-file ----------------- Create a master file argument <br />
+--starter-file ------------------ Create a starter file argument <br />
+--engine-file ------------------ Create an engine file argument <br />
+--restart-file ------------------ Create a restart file argument <br />
+--nastran-file ----------------- Create a Nastran file argument <br />
+--parameter-file ------------- Create a parameter file argument <br />
+--additional-files ------------ Create an multi-file argument to attach any additional files to the job <br />
+--attach-directory ----------- Create a directory argument to attach a directory of files to the job <br />
+--convert-to-unix ------------ Convert file line endings to Unix <br />
+--convert-to-windows ------ Convert file line endings to Windows <br />
+--normalize-archives ------- Uncompress job files <br />
+--transfer-include-files ----- Transfer include files to the execution node <br />
+--compress-results ---------- Compress job result files </p>
+
+<h3>pas-appmaker --input-file</h3>
+
+<p>This command option creates an application argument that allows the user to choose the input file for the application.</p>
+
+<ul>
+<li>input ----------- any filename containing the word "input" is assigned as the job input file</li>
+<li>master --------- any filename containing the word "master" is assigned as the job master file</li>
+<li>starter --------- any filename containing the word "starter" is assigned as the job starter file</li>
+<li>engine --------- any filename containing the word "engine" is assigned as the job engine file</li>
+<li>restart --------- any filename containing the word "restart" is assigned as the job restart file</li>
+<li>nastran -------- any filename containing the word "nastran" is assigned as the job nastran file</li>
+<li>parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</li>
+</ul>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp b-input-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;INPUT_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone input file or ZIP archive. This option supports the automatic detection of master, starter and engine files.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Input File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($INPUT_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$INPUT_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Input File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the file tree.</p>
+
+<h3>pas-appmaker --input-file-array</h3>
+
+<p>This command option creates an application argument that allows multiple filenames to be chosen as input files to the application. Each input file will be executed within its own job array index.</p>
+
+<p>Addtionally, use the --normalize-archives option to uncompress .zip archive files, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):</p>
+
+<ul>
+<li>input ----------- any filename containing the word "input" is assigned as the job input file</li>
+<li>master --------- any filename containing the word "master" is assigned as the job master file</li>
+<li>starter --------- any filename containing the word "starter" is assigned as the job starter file</li>
+<li>engine --------- any filename containing the word "engine" is assigned as the job engine file</li>
+<li>restart --------- any filename containing the word "restart" is assigned as the job restart file</li>
+<li>nastran -------- any filename containing the word "nastran" is assigned as the job nastran file</li>
+<li>parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</li>
+</ul>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp b-input-file-array</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileNameMulti&gt;
+        &lt;Name&gt;INPUT_FILE_ARRAY&lt;/Name&gt;
+        &lt;Description&gt;Select your Input File (s). Each Input File will be executed inside of its own Job Array index.&lt;/Description&gt;
+        &lt;DisplayName&gt;Input File Array&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentFileNameMulti&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($INPUT_FILE_ARRAY)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$INPUT_FILE_ARRAY&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a multi-filename argument called <strong>Input File Array</strong> will be available. This argument will allow multiple files to be selected as input files to the job script.  The CM user can manually enter filenames, browse for local files, or drag files from the file tree.</p>
+
+<h3>pas-appmaker ---master-file</h3>
+
+<p>This command option creates an application argument that allows the user to choose the master file for the application. Use the --normalize-archives option to uncompress a .zip archive file, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):</p>
+
+<ul>
+<li>input ----------- any filename containing the word "input" is assigned as the job input file</li>
+<li>master --------- any filename containing the word "master" is assigned as the job master file</li>
+<li>starter --------- any filename containing the word "starter" is assigned as the job starter file</li>
+<li>engine --------- any filename containing the word "engine" is assigned as the job engine file</li>
+<li>restart --------- any filename containing the word "restart" is assigned as the job restart file</li>
+<li>nastran -------- any filename containing the word "nastran" is assigned as the job nastran file</li>
+<li>parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</li>
+</ul>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp ---master-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;MASTER_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone master file or ZIP archive containing a master file.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Master File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($MASTER_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$MASTER_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Master File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the file tree.</p>
+
+<h3>pas-appmaker --starter-file</h3>
+
+<p>This command option creates an application argument that allows the user to choose the starter file for the application.  Use the --normalize-archives option to uncompress a .zip archive file, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):</p>
+
+<ul>
+<li>input ----------- any filename containing the word "input" is assigned as the job input file</li>
+<li>master --------- any filename containing the word "master" is assigned as the job master file</li>
+<li>starter --------- any filename containing the word "starter" is assigned as the job starter file</li>
+<li>engine --------- any filename containing the word "engine" is assigned as the job engine file</li>
+<li>restart --------- any filename containing the word "restart" is assigned as the job restart file</li>
+<li>nastran -------- any filename containing the word "nastran" is assigned as the job nastran file</li>
+<li>parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</li>
+</ul>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --starter-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;STARTER_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone starter file or ZIP archive containing a starter file.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Starter File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($STARTER_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$STARTER_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Starter File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the file tree.</p>
+
+<h3>pas-appmaker --engine-file</h3>
+
+<p>This command option creates an application argument that allows the user to choose the engine file for the application.  Use the --normalize-archives option to uncompress a .zip archive file, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):</p>
+
+<ul>
+<li>input ----------- any filename containing the word "input" is assigned as the job input file</li>
+<li>master --------- any filename containing the word "master" is assigned as the job master file</li>
+<li>starter --------- any filename containing the word "starter" is assigned as the job starter file</li>
+<li>engine --------- any filename containing the word "engine" is assigned as the job engine file</li>
+<li>restart --------- any filename containing the word "restart" is assigned as the job restart file</li>
+<li>nastran -------- any filename containing the word "nastran" is assigned as the job nastran file</li>
+<li>parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</li>
+</ul>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --engine-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;ENGINE_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone engine file or ZIP archive containing a engine file.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Engine File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($ENGINE_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$ENGINE_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Engine File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the file tree.</p>
+
+<h3>pas-appmaker --restart-file</h3>
+
+<p>This command option creates an application argument of type filename that allows the user to choose the restart file for the job script.  Use the --normalize-archives option to uncompress a .zip archive file, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):
+- input ----------- any filename containing the word "input" is assigned as the job input file
+- master --------- any filename containing the word "master" is assigned as the job master file
+- starter --------- any filename containing the word "starter" is assigned as the job starter file
+- engine --------- any filename containing the word "engine" is assigned as the job engine file
+- restart --------- any filename containing the word "restart" is assigned as the job restart file
+- nastran -------- any filename containing the word "nastran" is assigned as the job nastran file
+- parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --restart-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;RESTART_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone restart file or ZIP archive containing a restart file.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Restart File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($RESTART_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$RESTART_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Restart File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the server file tree.</p>
+
+<h3>pas-appmaker --parameter-file</h3>
+
+<p>This command option creates an application argument of type filename that allows the user to choose the parameter file for the job script.   Use the --normalize-archives option to uncompress a .zip archive file, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):
+- input ----------- any filename containing the word "input" is assigned as the job input file
+- master --------- any filename containing the word "master" is assigned as the job master file
+- starter --------- any filename containing the word "starter" is assigned as the job starter file
+- engine --------- any filename containing the word "engine" is assigned as the job engine file
+- restart --------- any filename containing the word "restart" is assigned as the job restart file
+- nastran -------- any filename containing the word "nastran" is assigned as the job nastran file
+- parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --parameter-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;PARAMETER_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone parameter file or ZIP archive containing a parameter file.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Parameter File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($PARAMETER_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$PARAMETER_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Parameter File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the file tree.</p>
+
+<h3>pas-appmaker --nastran-file</h3>
+
+<p>This command option creates an application argument of type filename that allows the user to choose the Nastran file for the job script.   Use the --normalize-archives option to uncompress a .zip archive file, and automatically detect the following file designations contained within the archive file (matching is case-insensitive):
+- input ----------- any filename containing the word "input" is assigned as the job input file
+- master --------- any filename containing the word "master" is assigned as the job master file
+- starter --------- any filename containing the word "starter" is assigned as the job starter file
+- engine --------- any filename containing the word "engine" is assigned as the job engine file
+- restart --------- any filename containing the word "restart" is assigned as the job restart file
+- nastran -------- any filename containing the word "nastran" is assigned as the job nastran file
+- parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --nastran-file</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileName&gt;
+        &lt;Name&gt;NASTRAN_FILE&lt;/Name&gt;
+        &lt;Description&gt;
+            A standalone nastran file or ZIP archive containing a nastran file.
+        &lt;/Description&gt;
+        &lt;DisplayName&gt;Nastran File&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;/ArgumentFileName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($NASTRAN_FILE)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+         &lt;jsdl:URI&gt;$NASTRAN_FILE&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Nastran File</strong> will be available. The CM user can then manually enter a filename, browse for a local file, or drag a file from the file tree.</p>
+
+<h3>pas-appmaker --additional-files</h3>
+
+<p>This command option creates an application argument that allows the user to stage any additional files required by the application to its working directory. </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --additional-files</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentFileNameMulti&gt;
+        &lt;Name&gt;ADDITIONAL_FILES&lt;/Name&gt;
+        &lt;Description&gt;Automatically stage any additional files to the AppMaker jobs working directory.&lt;/Description&gt;
+        &lt;DisplayName&gt;Additional Files&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentFileNameMulti&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($ADDITIONAL_FILES)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$ADDITIONAL_FILES&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a multi-filename argument called <strong>Additional Files</strong> will be available. This argument will allow additional files required by the job to be staged to the job's working directory.  The CM user can manually enter filenames, browse for local files, or drag files from the file tree.</p>
+
+<h3>pas-appmaker  --convert-to-unix</h3>
+
+<p>This command option creates an application argument of type boolean that allows all job file line endings to be converted to a Unix format.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp b-convert-to-unix</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentBooleanWithDescription&gt;
+        &lt;Name&gt;CONVERT_TO_UNIX&lt;/Name&gt;
+        &lt;Description&gt;Convert the line endings of all files to UNIX format.&lt;/Description&gt;
+        &lt;DisplayName&gt;Convert to UNIX&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;FeatureEnabled&gt;true&lt;/FeatureEnabled&gt;
+    &lt;/ArgumentBooleanWithDescription&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a boolean argument called <strong>Convert to UNIX</strong> will be available. This argument will be displayed as a checkbox and by default will be enabled. This argument allows a user to choose to convert all job file line endings to a Unix format.</p>
+
+<h3>pas-appmaker  --convert-to-windows</h3>
+
+<p>This command option creates an application argument of type boolean that allows all job file line endings to be converted to a Windows format.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --convert-to-windows</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentBooleanWithDescription&gt;
+        &lt;Name&gt;CONVERT_TO_WINDOWS&lt;/Name&gt;
+        &lt;Description&gt;Convert the line endings of all files to Windows format.&lt;/Description&gt;
+        &lt;DisplayName&gt;Convert to Windows&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;FeatureEnabled&gt;true&lt;/FeatureEnabled&gt;
+    &lt;/ArgumentBooleanWithDescription&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a boolean argument called <strong>Convert to Windows</strong> will be available. This argument will be displayed as a checkbox and by default will be enabled. This argument allows a user to choose to convert all job fiel line endings to a Windows format.</p>
+
+<h3>pas-appmaker  --normalize-archives</h3>
+
+<p>This command option creates an application argument of type boolean that allows all job .zip archive files to be uncompressed, and automatically detects the following file designations contained within the archive file (matching is case-insensitive):
+- input ----------- any filename containing the word "input" is assigned as the job input file
+- master --------- any filename containing the word "master" is assigned as the job master file
+- starter --------- any filename containing the word "starter" is assigned as the job starter file
+- engine --------- any filename containing the word "engine" is assigned as the job engine file
+- restart --------- any filename containing the word "restart" is assigned as the job restart file
+- nastran -------- any filename containing the word "nastran" is assigned as the job nastran file
+- parameter ---- any filename containing the word "parameter" is assigned as the job parameter file</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --normalize-archives</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentBooleanWithDescription&gt;
+        &lt;Name&gt;NORMALIZE_ARCHIVES&lt;/Name&gt;
+        &lt;Description&gt;Automatically uncompress any attached .zip files. Additionally master, starter, engine and restart files will be automatically identified.&lt;/Description&gt;
+        &lt;DisplayName&gt;Normalize Archives&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;FeatureEnabled&gt;true&lt;/FeatureEnabled&gt;
+    &lt;/ArgumentBooleanWithDescription&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a boolean argument called <strong>Normalize Archives</strong> will be available. This argument will be displayed as a checkbox and by default will be enabled. This argument allows a user to choose to uncompress all a .zip job archive files and detect file designations.</p>
+
+<h2>pas-appmaker  --transfer-include-files</h2>
+
+<p>This command option creates an application argument of type boolean that enables/disables the detection of include file statements in job files.  Any remote files designated by an include file statement will be copied to the execution node.  Include statements are then modified to point to the file that has been copied locally.  This reduces network intensive I/O.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --transfer-include-files</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentBooleanWithDescription&gt;
+        &lt;Name&gt;TRANSFER_INCLUDE_FILES&lt;/Name&gt;
+        &lt;Description&gt;Automatically transfer any remote files mentioned as include statements.&lt;/Description&gt;
+        &lt;DisplayName&gt;Transfer Include Files&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;FeatureEnabled&gt;true&lt;/FeatureEnabled&gt;
+    &lt;/ArgumentBooleanWithDescription&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a boolean argument called <strong>Transfer Include Files</strong> will be available. This argument will be displayed as a checkbox and by default will be enabled. Any remote files designated by an include file statement will be copied to the execution node.</p>
+
+<h3>pas-appmaker --compress-results</h3>
+
+<p>This command option creates an application argument of type boolean that allows the job result files to be compressed into a single .zip archive file.</p>
+
+<p><strong><em>Note</em></strong> <br />
+This option also supports a .tar.gz archive file format. However, a special environment variable in the application exit phase must be set to make this happen.  Set this variable using the command option:</p>
+
+<pre><code>--exit-environment=PAS_COMPRESS_RESULTS_FORMAT=.tar.gz
+</code></pre>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --compress-results</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentBooleanWithDescription&gt;
+        &lt;Name&gt;COMPRESS_RESULTS&lt;/Name&gt;
+        &lt;Description&gt;Compress job results into a single ZIP file.&lt;/Description&gt;
+        &lt;DisplayName&gt;Compress Results&lt;/DisplayName&gt;
+        &lt;FeatureEnabled&gt;true&lt;/FeatureEnabled&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentBooleanWithDescription&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a boolean argument called <strong>Compress Results</strong> will be available. This argument will be displayed as a checkbox and by default will be enabled. This argument allows the job result files to be compressed into a single archive file.</p>
+
+<h3>pas-appmaker --attach-directory</h3>
+
+<p>This command option creates an application argument of type directory name that allows the user to attach a directory of files to the job.  These files will be staged to the job's working directory.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --attach-directory</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentDirectoryName&gt;
+        &lt;Name&gt;ATTACH_DIRECTORY&lt;/Name&gt;
+        &lt;Description&gt;Attach a directory filled with files to the AppMaker job.&lt;/Description&gt;
+        &lt;DisplayName&gt;Attach Directory&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+    &lt;/ArgumentDirectoryName&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>It will also create a data staging argument within the application converter file:</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;
+    &lt;jsdl:FileName&gt;name($ATTACH_DIRECTORY)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+    &lt;jsdl:Source&gt;
+        &lt;jsdl:URI&gt;$ATTACH_DIRECTORY&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a filename argument called <strong>Attach Directory</strong> will be available. The CM user can then manually enter a directory name, or drag a directory from the directory tree.</p>
+
+<h2>Create Application Actions</h2>
+
+<p>The following pas-appmaker command options are available for creating application actions. <br />
+--send-signals ------------ Create an application action that will send a signal to your application <br />
+--shell-command ------- Create an application action to execute a shell command</p>
+
+<h3>pas-appmaker --send-signals</h3>
+
+<p>This command option enables an application action that will send a signal to your application and any processes that it may have spawned.  The application action will only be available while the job is in a running state.   The application action will allow an application to be suspended, resumed, or terminated. </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --send-signals</p>
+
+<p>This option will create an application action called <strong>Send Signals</strong> having the following argument:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringEnumerated&gt;
+        &lt;Name&gt;SEND_SIGNALS&lt;/Name&gt;
+        &lt;Description&gt;Select which signal to send.&lt;/Description&gt;
+        &lt;DisplayName&gt;Signal&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+        &lt;Option&gt;Suspend&lt;/Option&gt;
+        &lt;Option&gt;Resume&lt;/Option&gt;
+        &lt;Option default="true"&gt;Terminate&lt;/Option&gt;
+    &lt;/ArgumentStringEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application action is executed from the Job Monitoring page of Compute Manager, a popup box will be displayed.  The user will be prompted to choose which signal to send to the application's process. The CM user can then choose to suspend, resume, or terminate the process.</p>
+
+<h3>pas-appmaker --shell-command</h3>
+
+<p>This command option enables an application action that will execute a shell command in your job's execution directory.  The application action will only be available while the job is in a running state.  </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --shell-command</p>
+
+<p>This option will create an application action called <strong>Shell Command</strong> having the following argument:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentString&gt;
+        &lt;Name&gt;SHELL_COMMAND&lt;/Name&gt;
+        &lt;Description&gt;Run this shell command.&lt;/Description&gt;
+        &lt;DisplayName&gt;Command&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;
+    &lt;/ArgumentString&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application action is executed from the Job Monitoring page of Compute Manager, a popup box will be displayed.  The user will be prompted to enter a shell command which will be executed in the job's execution directory.</p>
+
+<h2>Advanced Options</h2>
+
+<p>The following pas-appmaker command options are advanced options for more advanced application definition authors. <br />
+--import-postsubmit ------- automatically installs a PBS hook <br />
+--site-versions --------------- pulls versions from the site configuration file <br />
+--logging ---------------------- enables appmaker logging <br />
+--input-environment ------ directs appmaker to add environment variables to the application's input phase environment <br />
+--input-hook ----------------- enable this file as the application's input hook <br />
+--submit-environment ----- directs appmaker to add environment variables to the application's submit phase environment <br />
+--submit-hook --------------- enable this file as the application's input hook <br />
+--start-environment ------- directs appmaker to add environment variables to the application's start phase environment <br />
+--start-hook ------------------ enable this file as the application's input hook <br />
+--actions-environment ---- directs appmaker to add environment variables to the application's actions phase environment <br />
+--actions-hook --------------- enable this file as the application's input hook <br />
+--exit-environment --------- directs appmaker to add environment variables to the application's exit phase environment <br />
+--exit-hook -------------------- enable this file as the application's input hook   </p>
+
+<h3>pas-appmaker --import-postsubmit</h3>
+
+<p>Some of the features of appmaker require a <em>postsubmit.py</em> PBS Professional hook, an extension to the <em>presubmit.py</em> submit phase base file.  This command option will install the hook as long as you, the author, have permissions to install the PBS hook.  Otherwise, contact your site's PBS administrator to import this hook via qmgr.  Options that require the installation of a PBS hook are: <br />
+ * --input-file-array <br />
+ * --project</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --import-postsubmit</p>
+
+<h3>pas-appmaker --site-versions</h3>
+
+<p>This command option creates an application argument of type string that pulls the available versions of the application from the PAS site configuration file.   </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --site-versions</p>
+
+<p>This option will create the following application input argument within the application input file:</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentStringEnumerated&gt;
+        &lt;Name&gt;SITE_VERSIONS&lt;/Name&gt;
+        &lt;Description&gt;Please select which version of AppMaker you would like to use.&lt;/Description&gt;
+        &lt;DisplayName&gt;Site Versions&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;
+        &lt;xi:include href="site-config.xml" xpointer="xpath1(//Application[@id='MyApp']/ApplicationVersions//Option)"/&gt;
+    &lt;/ArgumentStringEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>When the application job submission form is viewed using Compute Manager, a string argument called <em>Site Versions</em> will be available. This argument will be displayed as a drop-down box with a list of available versions of the application pulled from the site configuration file.  Once a version is selected from the drop-down box and the job is submitted, the environment variable PAS_EXECUTABLE will be set to the executable associated with the selected version from the site configuration file.</p>
+
+<h3>pas-appmaker --logging</h3>
+
+<p>This command option enables logging.  Logging will be captured for each phase of the application lifecycle and will record: <br />
+    * Processing environment
+    * Resources
+    * Attributes
+    * Scripts
+    * Process ids
+    * Events 
+    * Hooks</p>
+
+<p>The log files will be returned with the job result files and will follow the naming convention <em>phasename.log</em>.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --logging</p>
+
+<h3>pas-appmaker --input-environment=&lt;name&gt;=&lt;value&gt;,&lt;name&gt;=&lt;value&gt;....</h3>
+
+<p>This command option directs appmaker to add the environment variables defined by the key-value pairs to the application's input phase environment.  If the environment variable is already defined in the application's environment, then its value will be overlaid.  Otherwise, the variable will be added to the application's input phase environment.  Any environment variables prefixed with "<em>PAS_</em>" will persist to the subsequent application phase.  Otherwise, the environment variable will only exist during the application's input phase.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --input-environment=PAS_NCPUS=14</p>
+
+<h3>pas-appmaker --input-hook=/path/to/your/script.ext</h3>
+
+<p>This command option directs appmaker to enable this script file as the application's input hook.  The file will be copied to the application's home directory <em>/var/spool/pas/repository/applications/AppName/submittime</em>.  The hook can be coded in any language and will be executed at the beginning of the input phase after the application's environment has been constructed. </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --input-hook=/path/to/your/script.ext</p>
+
+<h3>pas-appmaker --submit-environment=&lt;name&gt;=&lt;value&gt;,&lt;name&gt;=&lt;value&gt;....</h3>
+
+<p>This command option directs appmaker to add the environment variables defined by the key-value pairs to the application's submit phase environment.  If the environment variable is already defined in the application's environment, then its value will be overlaid.  Otherwise, the variable will be added to the application's submit phase environment.  Any environment variables prefixed with "<em>PAS_</em>" will persist to the subsequent application phase.  Otherwise, the environment variable will only exist during the application's submit phase.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --submit-environment=PAS_SELECT=2,PAS_NCPUS=8,PAS_MEM=1gb</p>
+
+<h3>pas-appmaker --submit-hook=/path/to/your/script.ext</h3>
+
+<p>This command option directs appmaker to enable this script file as the application's submit hook.  The file will be copied to the application's home directory <em>/var/spool/pas/repository/applications/AppName/submittime</em>.  The hook can be coded in any language and will be executed at the beginning of the submit phase after the application's environment has been constructed.  </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --submit-hook=/path/to/your/script.ext</p>
+
+<h3>pas-appmaker --start-environment=&lt;name&gt;=&lt;value&gt;,&lt;name&gt;=&lt;value&gt;....</h3>
+
+<p>This command option directs appmaker to add the environment variables defined by the key-value pairs to the application's start phase environment.  If the environment variable is already defined in the application's environment, then its value will be overlaid.  Otherwise, the variable will be added to the application's start phase environment.  Any environment variables prefixed with "<em>PAS_</em>" will persist to the subsequent application phase.  Otherwise, the environment variable will only exist during the application's start phase.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --start-environment=PAS_EXECUTABLE=/bin/sleep,PAS_ARGUMENTS=30</p>
+
+<h3>pas-appmaker --start-hook=/path/to/your/script.ext</h3>
+
+<p>This command option directs appmaker to enable this script file as the application's start hook.  The file will be copied to the application's home directory <em>/var/spool/pas/repository/applications/AppName/runtime</em>.  The hook can be coded in any language and will be executed at the beginning of the start phase after the application's environment has been constructed.  </p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --submit-hook=/path/to/your/script.ext</p>
+
+<h3>pas-appmaker --actions-environment=&lt;name&gt;=&lt;value&gt;,&lt;name&gt;=&lt;value&gt;....</h3>
+
+<p>This command option directs appmaker to add the environment variables defined by the key-value pairs to the application's actions phase environment.  If the environment variable is already defined in the application's environment, then its value will be overlaid.  Otherwise, the variable will be added to the application's actions phase environment.  Any environment variables prefixed with "<em>PAS_</em>" will persist to the subsequent application phase.  Otherwise, the environment variable will only exist during the application's actions phase.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --actions-environment=PAS_SEND_SIGNALS=true</p>
+
+<h3>pas-appmaker --actions-hook=/path/to/your/script.ext</h3>
+
+<p>This command option directs appmaker to enable this script file as the application's action hook.  The file will be copied to the application's home directory <em>/var/spool/pas/repository/applications/AppName/runtime</em>.  The hook can be coded in any language and will be executed at the beginning of the action phase after the application's environment has been constructed.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --actions-hook=/path/to/your/script.ext</p>
+
+<h3>pas-appmaker --exit-environment=&lt;name&gt;=&lt;value&gt;,&lt;name&gt;=&lt;value&gt;....</h3>
+
+<p>This command option directs appmaker to add the environment variables defined by the key-value pairs to the application's exit phase environment.  If the environment variable is already defined in the application's environment, then its value will be overlaid.  Otherwise, the variable will be added to the application's exit phase environment.  Any environment variables prefixed with "<em>PAS_</em>" will persist to the subsequent application phase.  Otherwise, the environment variable will only exist during the application's exit phase.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --exit-environment=PAS_COMPRESS_RESULTS=true</p>
+
+<h3>pas-appmaker --exit-hook=/path/to/your/script.ext</h3>
+
+<p>This command option directs appmaker to enable this script file as the application's exit hook.  The file will be copied to the application's home directory <em>/var/spool/pas/repository/applications/AppName/runtime</em>.  The hook can be coded in any language and will be executed at the beginning of the exit phase after the application's environment has been constructed.</p>
+
+<p><strong>Command example:</strong>  pas-appmaker MyApp --exit-hook=/path/to/your/script.ext</p>
+
+<h2>Copyright</h2>
+
+<p>o?= Copyright 2013 - 2014 Altair Engineering, Inc. All rights reserved.</p>

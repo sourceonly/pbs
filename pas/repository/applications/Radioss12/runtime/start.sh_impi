@@ -1,0 +1,66 @@
+#!/bin/bash
+export HW12_HOME=/hosts/node007/data02/Logiciels/ALTAIR/hw12.0/altair
+export ALTAIR_LICENSE_PATH=6200@node007
+
+###########plmpi##################
+export MPI_ROOT=/hosts/node007/data02/Logiciels/MPI/intelmpi-4.0.0
+export PATH=${HW12_HOME}/hwsolvers/radioss/bin/linux64:$MPI_ROOT/bin64:$PATH
+export LD_LIBRARY_PATH=${HW12_HOME}/hwsolvers/common/bin/linux64:${HW12_HOME}/hw/lib/linux64:$MPI_ROOT/lib64:$LD_LIBRARY_PATH
+
+cp ${HW12_HOME}/hwsolvers/common/bin/linux64/radflex_12_linux64 ./
+
+ulimit -s unlimited
+ulimit -l unlimited
+export KMP_STACKSIZE=400m
+unset OMP_NUM_THREADS
+unset NCPUS
+export OMP_NUM_THREADS=1
+#export I_MPI_DEVICE=rdssm
+#export I_MPI_PIN_DOMIN=auto
+#export KMP_AFFINITY=compact
+
+NP=`cat ${PBS_NODEFILE} | wc -l`
+HOST=`uniq -c ${PBS_NODEFILE}| wc -l`
+#####################STARTER_CMD###########
+/hosts/node007/data02/Logiciels/ALTAIR/hw12.0/altair/hwsolvers/radioss/bin/linux64/s_12.0.210_linux64 -np ${NP} -input $STARTERFILE
+
+#########COPY FILE##############
+for i in `uniq ${PBS_NODEFILE}|sed '1d'`
+do
+scp -r ${PBS_JOBDIR}/*  ${i}:${PBS_JOBDIR}/
+done
+/bin/sleep 10s
+##############Config Machinefile############
+
+uniq -c ${PBS_NODEFILE}|awk '{print $2":"$1}' > machine
+#bhosts=`uniq -c $PBS_NODEFILE`
+#cat ${bhosts} > machine
+uniq ${PBS_NODEFILE}|awk '{print $1}' > mpd.hosts
+#cat ${mpd} > mpd.hosts
+
+/bin/sleep 10s
+#############ENGIN_CMD#################
+
+#cmd="${MPI_ROOT}/bin/mpirun -e MPI_REMSH=/usr/bin/ssh -stdio=i0 -np ${NP} -hostlist ${bhosts} ${PAS_EXECUTABLE} -i $ENGINEFILES "
+unset PYTHONSTARTUP
+unset PYTHONHOME
+unset PAS_PYTHON_PATH
+
+
+cmd="${MPI_ROOT}/bin64/mpirun -f ~/mpd.hosts -machinefile ./machine  -np ${NP} /hosts/node007/data02/Logiciels/ALTAIR/hw12.0/altair/hwsolvers/radioss/bin/linux64/e_12.0.210_linux64_impi_sp -input $ENGINEFILES "
+echo $cmd
+${cmd}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

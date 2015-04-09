@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput
+   
+   xmlns="http://schemas.altair.com/pbs/2007/02/app-def"
+   xmlns:xi="http://www.w3.org/2001/XInclude"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  <ApplicationId>Hyperworks</ApplicationId>
+  <ApplicationName>Hyperworks</ApplicationName>
+
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>JOB_NAME</Name>
+      <Description>The name of the job.</Description>
+      <DisplayName>Job Name</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentString>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>JOB_TYPE</Name>
+      <Description>The type of the job.</Description>
+      <DisplayName>Job Type</DisplayName>
+      <Option>hyperview</Option>
+      <Option>hypermesh</Option>
+      <InputRequired>true</InputRequired>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>GEOMETRY</Name>
+      <Description>GEOMETRY</Description>
+      <DisplayName>GEOMETRY</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option>1024x768</Option>
+      <Option>1366x768</Option>
+      <Option>1440x900</Option>
+      <Option>1600x900</Option>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice> 
+<!--
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>CONNECT_ENABLED</Name>
+      <Description>CONNECT_ENABLED</Description>
+      <InputRequired>true</InputRequired>
+      <DefaultValue>true</DefaultValue>
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+-->
+   <ArgumentChoice>
+        <ArgumentBooleanWithDescription>
+            <Name>DM_JOB</Name>
+            <Description>Connect to Display Manager</Description>
+            <DisplayName>Connect to Display Manager</DisplayName>
+            <InputRequired>false</InputRequired>
+            <FeatureEnabled>true</FeatureEnabled>
+        </ArgumentBooleanWithDescription>
+    </ArgumentChoice>
+
+
+    <ArgumentChoice>
+        <ArgumentFileName>
+            <Name>JOB_SCRIPT</Name>
+            <Description>JOB_SCRIPT</Description>
+            <DisplayName>JOB_SCRIPT</DisplayName>
+            <InputRequired>false</InputRequired>
+            <StageinRequired>true</StageinRequired>
+        </ArgumentFileName>
+    </ArgumentChoice>
+  <!-- For PBS Desktop ONLY! -->
+
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>SUBMISSION_DIRECTORY</Name>
+      <Description>Result files will be placed here by PBS Desktop.</Description>
+      <DisplayName>Output Directory</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+
+</TemplateApplicationInput>

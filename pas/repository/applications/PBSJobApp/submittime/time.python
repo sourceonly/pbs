@@ -1,0 +1,8 @@
+#!/usr/bin/python
+import time
+import os
+def count () :
+	return int(time.time()*100000)%100
+cmd="/bin/sleep " + "0.0"+str(count());
+print cmd
+os.system(cmd)

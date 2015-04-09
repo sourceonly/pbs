@@ -1,0 +1,29 @@
+#!/bin/bash
+export PATH=/opt/TurboVNC/bin/:$PATH
+/opt/TurboVNC/bin/vncserver -noauth -noxstartup 2>vnc.log
+DISPLAY=`cat vnc.log | grep Desktop | grep "started on" ` 
+DISPLAY=${DISPLAY##*:}
+echo `hostname`:$DISPLAY > vncid
+export DISPLAY=$DISPLAY
+gnome-wm &
+#xclock 
+
+vglrun /usr/local/bin/${PAS_JOB_TYPE}
+
+while /bin/true 
+do
+	sleep 20
+done
+wait
+
+
+
+
+
+
+
+
+
+
+
+

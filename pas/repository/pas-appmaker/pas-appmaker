@@ -1,0 +1,2207 @@
+#!/usr/bin/env python
+#coding: utf-8
+
+'''
+© Copyright 2013 - 2014 Altair Engineering, Inc. All rights reserved.
+This code is provided “as is” without any warranty, express or implied, or
+indemnification of any kind. All other terms and conditions are as specified
+in the Altair PBS Application Services EULA.
+'''
+
+import os
+import sys
+import re
+import shutil
+
+from optparse import OptionParser
+from optparse import OptionGroup
+
+import datetime
+
+__version__ = '12.1.0'
+
+''' Configuration Options '''
+
+parser = OptionParser(usage='%prog <APPLICATION> [Options]',
+                      version='%prog ' + __version__,
+                      description='A framework for making powerful application definitions.')
+
+parser.add_option("--app-home", dest="app_home",
+                  metavar="/var/spool/pas/repository/applications",
+                  help='This command option sets the application\'s home directory.')
+
+parser.add_option("--app-config", dest="app_config",
+                  metavar="/var/spool/pas/repository/pas-appmaker/config/",
+                  help='This command option sets the application\'s configuration directory.')
+
+parser.add_option("--app-chmod", dest="app_chmod",
+                  metavar="0755",
+                  help='This command option changes the permissions of all application files.')
+
+parser.add_option("--app-chown", dest="app_chown",
+                  metavar="50005:100",
+                  help='This command option changes the ownership of all application files.')
+
+''' Resource Options '''
+
+resources = OptionGroup(parser, "Resources",
+                        'The following pas-appmaker command options are available for presenting application arguments that can be used for requesting job resources.')
+
+resources.add_option('--resources',
+                     dest='resources',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows job resources to be requested at job submission time.')
+
+resources.add_option('--select',
+                     dest='select',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows chunks to be requested at job submission time.')
+
+resources.add_option('--ncpus',
+                     dest='ncpus',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the number of CPUs to be requested at job submission time.')
+
+resources.add_option('--ngpus',
+                     dest='ngpus',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the number of graphical CPUs to be requested at job submission time.')
+
+resources.add_option('--mpiprocs',
+                     dest='mpiprocs',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the number of MPI processes per chunk to be requested at job submission time.')
+
+resources.add_option('--ompthreads',
+                     dest='ompthreads',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the number of OpenMP threads for this chunk to be requested at job submission time.')
+
+resources.add_option('--mem',
+                     dest='mem',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the amount of physical memory per chunk to be requested at job submission time.')
+
+resources.add_option('--vmem',
+                     dest='vmem',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the amount of virtual memory per chunk to be requested at job submission time.')
+
+resources.add_option('--walltime',
+                     dest='walltime',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the walltime to be requested at job submission time.')
+
+resources.add_option('--arch',
+                     dest='arch',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the system architecture to be requested at job submission time.')
+
+resources.add_option('--vnode',
+                     dest='vnode',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the virtual node to be requested at job submission time.')
+
+resources.add_option('--place',
+                     dest='place',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the placement of each chunk to be requested at job submission time.')
+
+parser.add_option_group(resources)
+
+
+''' Attribute Options '''
+
+attributes = OptionGroup(parser, "Attributes",
+                         'The following pas-appmaker command options are available for creating application arguments that can be used for specifying job attributes and characteristics.')
+
+attributes.add_option('--attributes',
+                      dest='attributes',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates an application argument that allows job attributes or characteristics to be set.')
+
+attributes.add_option('--depend',
+                      dest='depend',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates an application argument that allows job dependencies to be specified.')
+
+# This feature will not be available until Beta 2.
+#
+#attributes.add_option('--depend-by-name',
+#                      dest='depend_by_name',
+#                      action='store_true',
+#                      default=False,
+#                      help='Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
+#                      'In sollicitudin felis id lobortis dictum. Nullam elementum rhoncus nisl ac faucibus.')
+
+attributes.add_option('--group-list',
+                      dest='group_list',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates an application argument that specifies the groups under which the job will run.')
+
+attributes.add_option('--account',
+                      dest='account',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates an application argument that specifies the account under which the job will run.')
+
+attributes.add_option('--project',
+                      dest='project',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates an application argument that assigns a project to the job at job submission time.')
+
+attributes.add_option('--queue',
+                      dest='queue',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates an application argument that specifies the queue to which the job will be submitted.')
+
+attributes.add_option('--mail',
+                      dest='mail',
+                      action='store_true',
+                      default=False,
+                      help='This command option creates two application arguments. '
+                      'The first application argument allows the recipients of the mail to be defined. '
+                      'The second application argument is a list that determines when the email should be sent')
+
+attributes.add_option('--job-arrays',
+                      dest='job_arrays',
+                      action='store_true',
+                      default=False,
+                      help='This option allows a job array to be created. Three application arguments allow the user '
+                      'to specify the start, end and index of the array and a stepping factor.')
+
+parser.add_option_group(attributes)
+
+
+''' Execution Options '''
+
+execution = OptionGroup(parser, "Execution",
+                        'The following pas-appmaker command options are available for setting aspects of the application specific to the executable, its arguments, and other related "Solver" specific options.')
+
+execution.add_option('--software',
+                     dest='software',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument which allows you to specify the name of the software associated with the application being created.')
+
+execution.add_option('--environment',
+                     dest='environment',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows environment variables to be exported to the job.')
+
+execution.add_option('--executable',
+                     dest='executable',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows an executable to be specified for job execution.')
+
+execution.add_option('--script',
+                     dest='script',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that specifies a specific script to execute at run time.')
+
+execution.add_option('--arguments',
+                     dest='arguments',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows arguments to be passed to an executable or script.')
+
+execution.add_option('--run-parallel',
+                     dest='run_parallel',
+                     action='store_true',
+                     default=False,
+                     help='This command option creates an application argument that allows the user to choose to run the executable or script in parallel across all nodes.')
+
+parser.add_option_group(execution)
+
+
+''' File Options '''
+
+files = OptionGroup(parser, "Files",
+                    'The following pas-appmaker command options are available for creating application input arguments for different types of files.')
+
+files.add_option('--input-file',
+                 dest='input_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the input file for the application.')
+
+files.add_option('--input-file-array',
+                 dest='input_file_array',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows multiple filenames to be chosen as input files to the job script. Each input file will be executed within its own job array index.')
+
+files.add_option('--master-file',
+                 dest='master_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the master file for the application.')
+
+files.add_option('--starter-file',
+                 dest='starter_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the starter file for the application.')
+
+files.add_option('--engine-file',
+                 dest='engine_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the engine file for the application.')
+
+files.add_option('--restart-file',
+                 dest='restart_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the restart file for the application.')
+
+files.add_option('--nastran-file',
+                 dest='nastran_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the nastran file for the application.')
+
+files.add_option('--parameter-file',
+                 dest='parameter_file',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to choose the parameter file for the application.')
+
+files.add_option('--additional-files',
+                 dest='additional_files',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to stage any additional files required by the application to its working directory.')
+
+files.add_option('--attach-directory',
+                 dest='attach_directory',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that allows the user to attach a directory containing files to the application.')
+
+files.add_option('--convert-to-unix',
+                 dest='convert_to_unix',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that will automatically convert all attached files to UNIX line endings.')
+
+# This feature will not be made available until Beta 2.
+
+#files.add_option('--convert-to-windows',
+#                 dest='convert_to_windows',
+#                 action='store_true',
+#                 default=False,
+#                 help='Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
+#                 'In sollicitudin felis id lobortis dictum. Nullam elementum rhoncus nisl ac faucibus.')
+
+files.add_option('--normalize-archives',
+                 dest='normalize_archives',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that will enable the ability to open attached .zip files and detect all supported file types automaticaly.')
+
+files.add_option('--transfer-include-files',
+                 dest='transfer_include_files',
+                 action='store_true',
+                 default=False,
+                 help='This command option creates an application argument that is capable of automatically staging include files to the jobs working directory regardless of its remote location.')
+
+files.add_option('--compress-results',
+                 dest='compress_results',
+                 action='store_true',
+                 default=False,
+                 help='This command option will automatically compress all result files into either .tar.gz or .zip before returning to the staging area after the job exits.')
+
+parser.add_option_group(files)
+
+
+''' Action Options '''
+
+actions = OptionGroup(parser, "Actions",
+                      'The following pas-appmaker options expose application actions that can be executed against a job while it is running.')
+
+actions.add_option('--send-signals',
+                   dest='send_signals',
+                   action='store_true',
+                   default=False,
+                   help='This command option will send common UNIX signals to the application.')
+
+actions.add_option('--shell-command',
+                   dest='shell_command',
+                   action='store_true',
+                   default=False,
+                   help='This command option will allow the user to send shell commands to the job while it is running.')
+
+parser.add_option_group(actions)
+
+advanced = OptionGroup(parser, "Advanced",
+                       'The following pas-appmaker options expose the more advanced/author/developer related features.')
+
+advanced.add_option("--import-postsubmit",
+                    dest="import_postsubmit",
+                    action='store_true',
+                    default=False,
+                    help='Assuming the author has the correct permissions, this option will automatically import to PBS the pas-appmaker postsubmit hook.')
+
+advanced.add_option("--site-versions",
+                    dest="site_versions",
+                    action='store_true',
+                    default=False,
+                    help='This command option will leverage the list of available versions as specified in the site-config.xml file for the given application.')
+
+advanced.add_option('--logging',
+                    dest='logging',
+                    action='store_true',
+                    default=False,
+                    help='This command option will enable debug logging for each phase of the application life cycle.')
+
+advanced.add_option('--input-environment',
+                    metavar="PAS_FOO=bar",
+                    dest='input_environment',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specifiy a comma separated list of environment variables to be imported to the Input Phase.')
+
+advanced.add_option('--input-hook',
+                    metavar="/path/to/your/script.ext",
+                    dest='input_hook',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specify a hook file to be executed at the beginning of the Input Phase. This file will be imported into the application definition itself.')
+
+advanced.add_option('--submit-environment',
+                    metavar="PAS_SELECT=2,PAS_NCPUS=8,PAS_MEM=1gb",
+                    dest='submit_environment',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specifiy a comma separated list of environment variables to be imported to the Submit Phase.')
+
+advanced.add_option('--submit-hook',
+                    metavar="/path/to/your/script.ext",
+                    dest='submit_hook',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specify a hook file to be executed at the beginning of the Submit Phase. This file will be imported into the application definition itself.')
+
+advanced.add_option('--start-environment',
+                    metavar="PAS_EXECUTABLE=/bin/sleep,PAS_ARGUMENTS=30",
+                    dest='start_environment',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specifiy a comma separated list of environment variables to be imported to the Start Phase.')
+
+advanced.add_option('--start-hook',
+                    metavar="/path/to/your/script.ext",
+                    dest='start_hook',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specify a hook file to be executed at the beginning of the Start Phase. This file will be imported into the application definition itself.')
+
+advanced.add_option('--actions-environment',
+                    metavar="PAS_SEND_SIGNALS=true",
+                    dest='actions_environment',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specifiy a comma separated list of environment variables to be imported to the Actions Phase.')
+
+advanced.add_option('--actions-hook',
+                    metavar="/path/to/your/script.ext",
+                    dest='actions_hook',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specify a hook file to be executed at the beginning of the Actions Phase. This file will be imported into the application definition itself.')
+
+advanced.add_option('--exit-environment',
+                    metavar="PAS_COMPRESS_RESULTS=true",
+                    dest='exit_environment',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specifiy a comma separated list of environment variables to be imported to the Exit Phase.')
+
+advanced.add_option('--exit-hook',
+                    metavar="/path/to/your/script.ext",
+                    dest='exit_hook',
+                    action='store',
+                    default='none',
+                    help='This command option will allow the author to specify a hook file to be executed at the beginning of the Exit Phase. This file will be imported into the application definition itself.')
+
+parser.add_option_group(advanced)
+
+(options, args) = parser.parse_args()
+
+
+''' Create Application '''
+
+if len(args) == 1:
+
+    sys.stdout.write('pas-appmaker - PBS Application Services %s.\n' % (__version__))
+
+    app_name = args[0]
+
+    ''' App Environment Setup '''
+
+    if options.app_home:
+
+        if os.path.exists(options.app_home):
+            if os.access(options.app_home, os.W_OK):
+                app_home = options.app_home
+            else:
+                sys.stderr.write('\nERROR: You do not appear to have Read access to the App Home directory.\n')
+                sys.exit(1)
+        else:
+            sys.stderr.write('\nERROR: The App Home directory that you specified does not appear to exist.\n')
+            sys.exit(1)
+
+    elif 'PAS_APP_HOME' in os.environ:
+
+        if os.path.exists(os.environ['PAS_APP_HOME']):
+            if os.access(os.environ['PAS_APP_HOME'], os.W_OK):
+                app_home = os.environ['PAS_APP_HOME']
+            else:
+                sys.stderr.write('\nERROR: You do not appear to have Write access to the App Home directory.\n')
+                sys.exit(1)
+        else:
+            sys.stderr.write('\nERROR: The App Home directory that you specified does not appear to exist.\n')
+            sys.exit(1)
+    else:
+        sys.stderr.write('\nERROR: You must specify the path to your App Home directory.\n')
+        sys.exit(1)
+
+    if options.app_config:
+
+        if os.path.exists(options.app_config):
+            if os.access(options.app_config, os.R_OK):
+                app_config = options.app_config
+            else:
+                sys.stderr.write('\nERROR: You do not appear to have Read access to the App Config directory.\n')
+                sys.exit(1)
+        else:
+            sys.stderr.write('\nERROR: The App Config directory that you specified does not appear to exist.\n')
+            sys.exit(1)
+
+    elif 'PAS_APP_CONFIG' in os.environ:
+
+        if os.path.exists(os.environ['PAS_APP_CONFIG']):
+            if os.access(os.environ['PAS_APP_CONFIG'], os.R_OK):
+                app_config = os.environ['PAS_APP_CONFIG']
+            else:
+                sys.stderr.write('\nERROR: You do not appear to have Read access to the App Config directory.\n')
+                sys.exit(1)
+        else:
+            sys.stderr.write('\nERROR: The App Config directory that you specified does not appear to exist.\n')
+            sys.exit(1)
+    else:
+        sys.stderr.write('\nERROR: You must specify the path to your App Config directory.\n')
+        sys.exit(1)
+
+    ''' App Config Setup '''
+
+    if os.access(app_home, os.R_OK):
+
+        app_config_input = open('%s/base/app-inp.xml' % (app_config), 'r')
+        app_config_converter = open('%s/base/app-conv.xml' % (app_config), 'r')
+        app_config_actions = open('%s/base/app-actions.xml' % (app_config), 'r')
+
+    else:
+
+        sys.stderr.write('\nERROR: You do not appear to have Read access to App Config.\n')
+        sys.exit(1)
+
+    if os.access(app_home, os.W_OK):
+
+        if os.path.exists('%s/%s' % (app_home, app_name)):
+            if not os.access(app_home, os.W_OK):
+
+                sys.stderr.write('\nERROR: You do not appear to have Write access to %s\n' % (app_name))
+                sys.exit(1)
+
+        ### Base Files
+
+        os.system('mkdir -p %s/%s' % (app_home, app_name))
+        os.system('mkdir -p %s/%s/submittime' % (app_home, app_name))
+        os.system('mkdir -p %s/%s/runtime' % (app_home, app_name))
+        os.system('cp %s/base/input.py %s/%s/submittime' % (app_config, app_home, app_name))
+        os.system('cp %s/base/presubmit.py %s/%s/submittime' % (app_config, app_home, app_name))
+        os.system('cp %s/base/postsubmit.py %s/%s/submittime' % (app_config, app_home, app_name))
+        os.system('cp %s/base/start.py %s/%s/runtime' % (app_config, app_home, app_name))
+        os.system('cp %s/base/actions.py %s/%s/runtime' % (app_config, app_home, app_name))
+        os.system('cp %s/base/exit.py %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if options.run_parallel is True:
+            os.system('cp %s/base/qlaunch.sh %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if options.transfer_include_files is True:
+            os.system('cp %s/base/include_parser.py %s/%s/runtime' % (app_config, app_home, app_name))
+
+        ### Template Files
+
+        if os.path.exists('%s/templates/input.py' % app_config):
+            os.system('cp %s/templates/input.py %s/%s/submittime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/input.hook' % app_config):
+            os.system('cp %s/templates/input.hook %s/%s/submittime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/input.environment' % app_config):
+            os.system('cp %s/templates/input.environment %s/%s/submittime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/presubmit.py' % app_config):
+            os.system('cp %s/templates/presubmit.py %s/%s/submittime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/postsubmit.py' % app_config):
+            os.system('cp %s/templates/postsubmit.py %s/%s/submittime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/submit.hook' % app_config):
+            os.system('cp %s/templates/submit.hook %s/%s/submittime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/submit.environment' % app_config):
+            os.system('cp %s/templates/submit.environment %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/start.py' % app_config):
+            os.system('cp %s/templates/start.py %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/start.hook' % app_config):
+            os.system('cp %s/templates/start.hook %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/start.environment' % app_config):
+            os.system('cp %s/templates/start.environment %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/actions.py' % app_config):
+            os.system('cp %s/templates/actions.py %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/actions.hook' % app_config):
+            os.system('cp %s/templates/actions.hook %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/actions.environment' % app_config):
+                os.system('cp %s/templates/actions.environment %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/exit.py' % app_config):
+            os.system('cp %s/templates/exit.py %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/exit.hook' % app_config):
+            os.system('cp %s/templates/exit.hook %s/%s/runtime' % (app_config, app_home, app_name))
+
+        if os.path.exists('%s/templates/exit.environment' % app_config):
+            os.system('cp %s/templates/exit.environment %s/%s/runtime' % (app_config, app_home, app_name))
+    else:
+
+        sys.stderr.write('\nERROR: You do not appear to have Write access to App Home.\n')
+        sys.exit(1)
+
+    app_name_input = open('%s/%s/app-inp-%s.xml' % (app_home, app_name, app_name), 'w')
+    app_name_converter = open('%s/%s/app-conv-%s.xml' % (app_home, app_name, app_name), 'w')
+    app_name_actions = open('%s/%s/app-actions-%s.xml' % (app_home, app_name, app_name), 'w')
+
+    ''' Logging '''
+
+    logging = True
+    log = open('%s/%s/app-summary-%s.log' % (app_home, app_name, app_name), 'w')
+
+    ''' Input File '''
+
+    enabled = True
+
+    if logging is True:
+        log.write('\n\nMaking Input File\n')
+
+    for line in app_config_input.readlines():
+
+        ''' Special Variable Substitution '''
+
+        line = re.sub('APP_NAME', app_name, line)
+        line = re.sub('APP_HOME', app_home, line)
+        line = re.sub('APP_CONFIG', app_config, line)
+
+        ''' Input Template '''
+
+        input_template_index = []
+
+        if re.match('.*INPUT_TEMPLATE EXISTS', line):
+            if os.path.exists('%s/templates/app-inp.xml' % app_config):
+
+                input_template = open('%s/templates/app-inp.xml' % app_config, 'r')
+
+                for template_line in input_template.readlines():
+
+                    if re.search('<Name>(.*)</Name>', template_line):
+                        input_template_index.append(template_line)
+
+                    if enabled is True:
+
+                        if not re.search('.*<!-- .* -->.*', template_line):
+                            app_name_input.write(template_line)
+
+                input_template.close()
+
+        ''' Appname Template '''
+
+        appname_template_index = []
+
+        if re.match('.*APPNAME_TEMPLATE EXISTS', line):
+            if os.path.exists('%s/templates/app-inp-%s.xml' % (app_config, app_name)):
+
+                appname_template = open('%s/templates/app-inp-%s.xml' % (app_config, app_name), 'r')
+
+                for template_line in appname_template.readlines():
+
+                    if re.search('<Name>(.*)</Name>', template_line):
+                        appname_template_index.append(template_line)
+
+                    if enabled is True:
+
+                        if not re.search('.*<!-- .* -->.*', template_line):
+                            app_name_input.write(template_line)
+
+                appname_template.close()
+
+        ''' Input Phase '''
+
+        if options.input_environment or options.input_hook:
+            line = re.sub('<RefreshOnUpdate>false</RefreshOnUpdate>',
+                          '<RefreshOnUpdate>true</RefreshOnUpdate>', line)
+            line = re.sub('<DefaultRefresh>false</DefaultRefresh>',
+                          '<DefaultRefresh>true</DefaultRefresh>', line)
+
+        ''' Site Versions '''
+
+        if re.match('.*PAS_SITE_VERSIONS BEGIN', line):
+
+            ### Check Template for XML
+            #
+            # This feature is on hold until Beta 2.
+            #
+            #for scanned_line in input_template_index:
+            #    if re.search('<Name>SITE_VERSIONS</Name>', scanned_line):
+            #        print scanned_line
+            #        options.site_versions = False
+
+            if logging is True:
+                log.write('\n\tSite Versions: %s' % (options.site_versions))
+
+            if options.site_versions is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SITE_VERSIONS END', line):
+
+            if options.site_versions is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Select '''
+
+        if re.match('.*PAS_SELECT BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tSelect: %s' % (options.select))
+
+            if options.select is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SELECT END', line):
+
+            if options.select is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Ncpus '''
+
+        if re.match('.*PAS_NCPUS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tNcpus: %s' % (options.ncpus))
+
+            if options.ncpus is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_NCPUS END', line):
+
+            if options.ncpus is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Ngpus '''
+
+        if re.match('.*PAS_NGPUS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tNgpus: %s' % (options.ngpus))
+
+            if options.ngpus is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_NGPUS END', line):
+
+            if options.ngpus is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Mpiprocs '''
+
+        if re.match('.*PAS_MPIPROCS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tMpiprocs: %s' % (options.mpiprocs))
+
+            if options.mpiprocs is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_MPIPROCS END', line):
+
+            if options.mpiprocs is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Ompthreads '''
+
+        if re.match('.*PAS_OMPTHREADS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tOmpthreads: %s' % (options.ompthreads))
+
+            if options.ompthreads is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_OMPTHREADS END', line):
+
+            if options.ompthreads is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Mem '''
+
+        if re.match('.*PAS_MEM BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tMem: %s' % (options.mem))
+
+            if options.mem is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_MEM END', line):
+
+            if options.mem is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Vmem '''
+
+        if re.match('.*PAS_VMEM BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tVmem: %s' % (options.vmem))
+
+            if options.vmem is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_VMEM END', line):
+
+            if options.vmem is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Walltime '''
+
+        if re.match('.*PAS_WALLTIME BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tWalltime: %s' % (options.walltime))
+
+            if options.walltime is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_WALLTIME END', line):
+
+            if options.walltime is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Arch '''
+
+        if re.match('.*PAS_ARCH BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tArch: %s' % (options.arch))
+
+            if options.arch is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ARCH END', line):
+
+            if options.arch is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Vnode '''
+
+        if re.match('.*PAS_VNODE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tVnode: %s' % (options.vnode))
+
+            if options.vnode is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_VNODE END', line):
+
+            if options.vnode is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Place '''
+
+        if re.match('.*PAS_PLACE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tPlace: %s' % (options.place))
+
+            if options.place is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_PLACE END', line):
+
+            if options.place is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Resources '''
+
+        if re.match('.*PAS_RESOURCES BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tResources: %s' % (options.resources))
+
+            if options.resources is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_RESOURCES END', line):
+
+            if options.resources is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Attributes '''
+
+        if re.match('.*PAS_ATTRIBUTES BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tAttributes: %s' % (options.attributes))
+
+            if options.attributes is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ATTRIBUTES END', line):
+
+            if options.attributes is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Depend '''
+
+        if re.match('.*PAS_DEPEND BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tDepend: %s' % (options.depend))
+
+            if options.depend is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_DEPEND END', line):
+
+            if options.depend is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Group List '''
+
+        if re.match('.*PAS_GROUP_LIST BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tGroup List: %s' % (options.group_list))
+
+            if options.group_list is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_GROUP_LIST END', line):
+
+            if options.group_list is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Account '''
+
+        if re.match('.*PAS_ACCOUNT BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tAccount: %s' % (options.account))
+
+            if options.account is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ACCOUNT END', line):
+
+            if options.account is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Project '''
+
+        if re.match('.*PAS_PROJECT BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tProject: %s' % (options.project))
+
+            if options.project is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_PROJECT END', line):
+
+            if options.project is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Queue '''
+
+        if re.match('.*PAS_QUEUE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tQueue: %s' % (options.queue))
+
+            if options.queue is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_QUEUE END', line):
+
+            if options.queue is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Mail '''
+
+        if re.match('.*PAS_MAIL BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tMail: %s' % (options.mail))
+
+            if options.mail is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_MAIL END', line):
+
+            if options.mail is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Job Arrays '''
+
+        if re.match('.*PAS_JOB_ARRAYS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tJob Arrays: %s' % (options.job_arrays))
+
+            if options.job_arrays is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_JOB_ARRAYS END', line):
+
+            if options.job_arrays is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Software '''
+
+        if re.match('.*PAS_SOFTWARE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tSoftware: %s' % (options.software))
+
+            if options.software is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SOFTWARE END', line):
+
+            if options.software is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Environment '''
+
+        if re.match('.*PAS_ENVIRONMENT BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tEnvironment: %s' % (options.environment))
+
+            if options.environment is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ENVIRONMENT END', line):
+
+            if options.environment is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Executable '''
+
+        if re.match('.*PAS_EXECUTABLE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tExecutable: %s' % (options.executable))
+
+            if options.executable is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_EXECUTABLE END', line):
+
+            if options.executable is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Script '''
+
+        if re.match('.*PAS_SCRIPT BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tScript: %s' % (options.script))
+
+            if options.script is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SCRIPT END', line):
+
+            if options.script is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Arguments '''
+
+        if re.match('.*PAS_ARGUMENTS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tArguments: %s' % (options.arguments))
+
+            if options.arguments is True:
+                enabled = True
+
+                #if options.start_environment and re.match('.*PAS_ARGUMENTS', options.start_environment):
+                #    if re.match('<Value></Value>', line):
+                #
+                #        start_environment = open('%s/%s/runtime/start.environment' % (app_home, app_name), 'r')
+                #
+                #        for variable in start_environment.readlines():
+                #
+                #            if re.search('PAS_ARGUMENTS', variable):
+                #
+                #                if re.match('(.*)=(.*)', variable):
+                #
+                #                    (key, value) = variable.split('=')
+                #                    line = re.sub('<Value></Value>', '<Value>%s</Value>' % value, line)
+
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ARGUMENTS END', line):
+
+            if options.arguments is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Run Parallel '''
+
+        if re.match('.*PAS_RUN_PARALLEL BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tRun Parallel: %s' % (options.run_parallel))
+
+            if options.run_parallel is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_RUN_PARALLEL END', line):
+
+            if options.run_parallel is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Input File '''
+
+        if re.match('.*PAS_INPUT_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tInput File: %s' % (options.input_file))
+
+            if options.input_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_INPUT_FILE END', line):
+
+            if options.input_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Input File Array '''
+
+        if re.match('.*PAS_INPUT_FILE_ARRAY BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tInput File Array: %s' % (options.input_file_array))
+
+            if options.input_file_array is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_INPUT_FILE_ARRAY END', line):
+
+            if options.input_file_array is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Master File '''
+
+        if re.match('.*PAS_MASTER_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tMaster File: %s' % (options.master_file))
+
+            if options.master_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_MASTER_FILE END', line):
+
+            if options.master_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Starter File '''
+
+        if re.match('.*PAS_STARTER_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tStarter File: %s' % (options.starter_file))
+
+            if options.starter_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_STARTER_FILE END', line):
+
+            if options.starter_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Engine File '''
+
+        if re.match('.*PAS_ENGINE_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tEngine File: %s' % (options.engine_file))
+
+            if options.engine_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ENGINE_FILE END', line):
+
+            if options.engine_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Restart File '''
+
+        if re.match('.*PAS_RESTART_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tRestart File: %s' % (options.restart_file))
+
+            if options.restart_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_RESTART_FILE END', line):
+
+            if options.restart_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Nastran File '''
+
+        if re.match('.*PAS_NASTRAN_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tNastran File: %s' % (options.nastran_file))
+
+            if options.nastran_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_NASTRAN_FILE END', line):
+
+            if options.nastran_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Parameter File '''
+
+        if re.match('.*PAS_PARAMETER_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tParameter File: %s' % (options.parameter_file))
+
+            if options.parameter_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_PARAMETER_FILE END', line):
+
+            if options.parameter_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Additional Files '''
+
+        if re.match('.*PAS_ADDITIONAL_FILES BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tAdditional Files: %s' % (options.additional_files))
+
+            if options.additional_files is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ADDITIONAL_FILES END', line):
+
+            if options.additional_files is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Attach Directory '''
+
+        if re.match('.*PAS_ATTACH_DIRECTORY BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tAttach Directory: %s' % (options.attach_directory))
+
+            if options.attach_directory is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ATTACH_DIRECTORY END', line):
+
+            if options.attach_directory is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Convert to UNIX '''
+
+        if re.match('.*PAS_CONVERT_TO_UNIX BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tConvert to UNIX: %s' % (options.convert_to_unix))
+
+            if options.convert_to_unix is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_CONVERT_TO_UNIX END', line):
+
+            if options.convert_to_unix is True:
+                pass
+            else:
+                enabled = True
+
+        #''' Convert to Windows '''
+        #
+        #if re.match('.*PAS_CONVERT_TO_WINDOWS BEGIN', line):
+        #
+        #    if logging is True:
+        #        log.write('\n\tConvert to Windows: %s' % (options.convert_to_windows))
+        #
+        #    if options.convert_to_windows is True:
+        #        enabled = True
+        #    else:
+        #        enabled = False
+        #
+        #if re.match('.*PAS_CONVERT_TO_WINDOWS END', line):
+        #
+        #    if options.convert_to_windows is True:
+        #        pass
+        #    else:
+        #        enabled = True
+
+        ''' Normalize Archives '''
+
+        if re.match('.*PAS_NORMALIZE_ARCHIVES BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tNormalize Archives: %s' % (options.normalize_archives))
+
+            if options.normalize_archives is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_NORMALIZE_ARCHIVES END', line):
+
+            if options.normalize_archives is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Transfer Include Files'''
+
+        if re.match('.*PAS_TRANSFER_INCLUDE_FILES BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tTransfer Include Files: %s' % (options.transfer_include_files))
+
+            if options.transfer_include_files is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_TRANSFER_INCLUDE_FILES END', line):
+
+            if options.transfer_include_files is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Compress Results '''
+
+        if re.match('.*PAS_COMPRESS_RESULTS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tCompress Results: %s' % (options.compress_results))
+
+            if options.compress_results is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_COMPRESS_RESULTS END', line):
+
+            if options.compress_results is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Logging '''
+
+        if re.match('.*PAS_LOGGING BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tLogging: %s' % (options.logging))
+
+            if options.logging is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_LOGGING END', line):
+
+            if options.logging is True:
+                pass
+            else:
+                enabled = True
+
+        if enabled is True:
+
+            if not re.search('.*<!-- .* -->.*', line):
+                app_name_input.write(line)
+
+    ''' Converter File '''
+
+    enabled = True
+
+    if logging is True:
+        log.write('\n\nMaking Converter File\n')
+
+    for line in app_config_converter.readlines():
+
+        ''' Special Variable Substitution '''
+
+        line = re.sub('APP_NAME', app_name, line)
+        line = re.sub('APP_HOME', app_home, line)
+        line = re.sub('APP_CONFIG', app_config, line)
+
+        ''' Converter Template '''
+
+        if re.match('.*CONVERTER_TEMPLATE EXISTS', line):
+            if os.path.exists('%s/templates/app-conv.xml' % app_config):
+
+                converter_template = open('%s/templates/app-conv.xml' % app_config, 'r')
+
+                for template_line in converter_template.readlines():
+
+                    if enabled is True:
+
+                        if not re.search('.*<!-- .* -->.*', template_line):
+                            app_name_converter.write(template_line)
+
+                converter_template.close()
+
+        ''' Appname Template '''
+
+        if re.match('.*APPNAME_TEMPLATE EXISTS', line):
+            if os.path.exists('%s/templates/app-conv-%s.xml' % (app_config, app_name)):
+
+                appname_template = open('%s/templates/app-conv-%s.xml' % (app_config, app_name), 'r')
+
+                for template_line in appname_template.readlines():
+
+                    if enabled is True:
+
+                        if not re.search('.*<!-- .* -->.*', template_line):
+                            app_name_converter.write(template_line)
+
+                appname_template.close()
+
+        ''' Job Arrays '''
+
+        if re.match('.*PAS_JOB_ARRAYS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tJob Arrays: %s' % (options.job_arrays))
+
+            if options.job_arrays is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_JOB_ARRAYS END', line):
+
+            if options.job_arrays is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Script '''
+
+        if re.match('.*PAS_SCRIPT BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tScript: %s' % (options.script))
+
+            if options.script is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SCRIPT END', line):
+
+            if options.script is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Input File '''
+
+        if re.match('.*PAS_INPUT_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tInput File: %s' % (options.input_file))
+
+            if options.input_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_INPUT_FILE END', line):
+
+            if options.input_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Input File Array '''
+
+        if re.match('.*PAS_INPUT_FILE_ARRAY BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tInput File Array: %s' % (options.input_file))
+
+            if options.input_file_array is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_INPUT_FILE_ARRAY END', line):
+
+            if options.input_file_array is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Master File '''
+
+        if re.match('.*PAS_MASTER_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tMaster File: %s' % (options.master_file))
+
+            if options.master_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_MASTER_FILE END', line):
+
+            if options.master_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Starter File '''
+
+        if re.match('.*PAS_STARTER_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tStarter File: %s' % (options.starter_file))
+
+            if options.starter_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_STARTER_FILE END', line):
+
+            if options.starter_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Engine File '''
+
+        if re.match('.*PAS_ENGINE_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tEngine File: %s' % (options.engine_file))
+
+            if options.engine_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ENGINE_FILE END', line):
+
+            if options.engine_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Restart File '''
+
+        if re.match('.*PAS_RESTART_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tRestart File: %s' % (options.restart_file))
+
+            if options.restart_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_RESTART_FILE END', line):
+
+            if options.restart_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Nastran File '''
+
+        if re.match('.*PAS_NASTRAN_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tNastran File: %s' % (options.nastran_file))
+
+            if options.nastran_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_NASTRAN_FILE END', line):
+
+            if options.nastran_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Parameter File '''
+
+        if re.match('.*PAS_PARAMETER_FILE BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tParameter File: %s' % (options.parameter_file))
+
+            if options.parameter_file is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_PARAMETER_FILE END', line):
+
+            if options.parameter_file is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Additional Files '''
+
+        if re.match('.*PAS_ADDITIONAL_FILES BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tAdditional Files: %s' % (options.additional_files))
+
+            if options.additional_files is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ADDITIONAL_FILES END', line):
+
+            if options.additional_files is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Attach Directory '''
+
+        if re.match('.*PAS_ATTACH_DIRECTORY BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tAttach Directory: %s' % (options.attach_directory))
+
+            if options.attach_directory is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_ATTACH_DIRECTORY END', line):
+
+            if options.attach_directory is True:
+                pass
+            else:
+                enabled = True
+
+        if enabled is True:
+
+            if not re.search('.*<!-- .* -->.*', line):
+                app_name_converter.write(line)
+
+    ''' Actions File '''
+
+    enabled = True
+
+    if logging is True:
+        log.write('\n\nMaking Actions File\n')
+
+    for line in app_config_actions.readlines():
+
+        ''' Special Variable Substitution '''
+
+        line = re.sub('APP_NAME', app_name, line)
+        line = re.sub('APP_HOME', app_home, line)
+        line = re.sub('APP_CONFIG', app_config, line)
+
+        ''' Actions Template '''
+
+        if re.match('.*ACTIONS_TEMPLATE EXISTS', line):
+            if os.path.exists('%s/templates/app-actions.xml' % app_config):
+
+                actions_template = open('%s/templates/app-actions.xml' % app_config, 'r')
+
+                for template_line in actions_template.readlines():
+
+                    if enabled is True:
+
+                        if not re.search('.*<!-- .* -->.*', template_line):
+                            app_name_actions.write(template_line)
+
+                actions_template.close()
+
+        ''' Appname Template '''
+
+        if re.match('.*APPNAME_TEMPLATE EXISTS', line):
+            if os.path.exists('%s/templates/app-actions-%s.xml' % (app_config, app_name)):
+
+                appname_template = open('%s/templates/app-actions-%s.xml' % (app_config, app_name), 'r')
+
+                for template_line in appname_template.readlines():
+
+                    if enabled is True:
+
+                        if not re.search('.*<!-- .* -->.*', template_line):
+                            app_name_actions.write(template_line)
+
+                appname_template.close()
+
+        ''' Send Signals '''
+
+        if re.match('.*PAS_SEND_SIGNALS BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tSend Signals: %s' % (options.send_signals))
+
+            if options.send_signals is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SEND_SIGNALS END', line):
+
+            if options.send_signals is True:
+                pass
+            else:
+                enabled = True
+
+        ''' Shell Command '''
+
+        if re.match('.*PAS_SHELL_COMMAND BEGIN', line):
+
+            if logging is True:
+                log.write('\n\tShell Command: %s' % (options.shell_command))
+
+            if options.shell_command is True:
+                enabled = True
+            else:
+                enabled = False
+
+        if re.match('.*PAS_SHELL_COMMAND END', line):
+
+            if options.shell_command is True:
+                pass
+            else:
+                enabled = True
+
+        if enabled is True:
+
+            if not re.search('.*<!-- .* -->.*', line):
+                app_name_actions.write(line)
+
+    ''' Environment Files '''
+
+    if not options.input_environment == 'none':
+
+        mode = 'w'
+
+        if logging is True:
+            log.write('\n\nInput Environment\n')
+
+        if os.path.exists('%s/templates/input.environment' % app_config):
+
+            shutil.copy2('%s/templates/input.environment' % app_config,
+                         '%s/%s/submittime/input.environment' % (app_home, app_name))
+            mode = 'a'
+
+        input_environment = open('%s/%s/submittime/input.environment' % (app_home, app_name), mode)
+
+        for variable in options.input_environment.split(','):
+
+            input_environment.write('%s\n' % (variable))
+
+            if logging is True:
+                log.write('\n\t%s' % (variable))
+
+        input_environment.close()
+
+    if not options.submit_environment == 'none':
+
+        mode = 'w'
+
+        if logging is True:
+            log.write('\n\nSubmit Environment\n')
+
+        if os.path.exists('%s/templates/submit.environment' % app_config):
+
+            shutil.copy2('%s/templates/submit.environment' % app_config,
+                         '%s/%s/submittime/submit.environment' % (app_home, app_name))
+            mode = 'a'
+
+        submit_environment = open('%s/%s/submittime/submit.environment' % (app_home, app_name), mode)
+
+        for variable in options.submit_environment.split(','):
+
+            submit_environment.write('%s\n' % (variable))
+
+            if logging is True:
+                log.write('\n\t%s' % (variable))
+
+        submit_environment.close()
+
+    if not options.start_environment == 'none':
+
+        mode = 'w'
+
+        if logging is True:
+            log.write('\n\nStart Environment\n')
+
+        if os.path.exists('%s/templates/start.environment' % app_config):
+
+            shutil.copy2('%s/templates/start.environment' % app_config,
+                         '%s/%s/runtime/start.environment' % (app_home, app_name))
+            mode = 'a'
+
+        start_environment = open('%s/%s/runtime/start.environment' % (app_home, app_name), mode)
+
+        for variable in options.start_environment.split(','):
+
+            start_environment.write('%s\n' % (variable))
+
+            if logging is True:
+                log.write('\n\t%s' % (variable))
+
+        start_environment.close()
+
+    if not options.actions_environment == 'none':
+
+        mode = 'w'
+
+        if logging is True:
+            log.write('\n\nActions Environment\n')
+
+        if os.path.exists('%s/templates/actions.environment' % app_config):
+
+            shutil.copy2('%s/templates/actions.environment' % app_config,
+                         '%s/%s/runtime/actions.environment' % (app_home, app_name))
+            mode = 'a'
+
+        actions_environment = open('%s/%s/runtime/actions.environment' % (app_home, app_name), mode)
+
+        for variable in options.actions_environment.split(','):
+
+            actions_environment.write('%s\n' % (variable))
+
+            if logging is True:
+                log.write('\n\t%s' % (variable))
+
+        actions_environment.close()
+
+    if not options.exit_environment == 'none':
+
+        mode = 'w'
+
+        if logging is True:
+            log.write('\n\nExit Environment\n')
+
+        if os.path.exists('%s/templates/exit.environment' % app_config):
+
+            shutil.copy2('%s/templates/exit.environment' % app_config,
+                         '%s/%s/runtime/exit.environment' % (app_home, app_name))
+            mode = 'a'
+
+        exit_environment = open('%s/%s/runtime/exit.environment' % (app_home, app_name), mode)
+
+        for variable in options.exit_environment.split(','):
+
+            exit_environment.write('%s\n' % (variable))
+
+            if logging is True:
+                log.write('\n\t%s' % (variable))
+
+        exit_environment.close()
+
+    ''' Hooks '''
+
+    if logging is True:
+        log.write('\n\nHooks\n')
+
+    if not options.input_hook == 'none':
+
+        if logging is True:
+            log.write('\n\tInput: %s' % (options.input_hook))
+
+        if os.path.exists(options.input_hook):
+
+            if os.path.exists('%s/templates/input.hook' % app_config):
+
+                sys.stderr.write('\nWARNING: You are overwriting an input.hook file provided '
+                                 'as part of the application configuration you are using. This may '
+                                 'have adverse effects on your application.\n')
+
+            shutil.copy2(options.submit_hook, '%s/%s/submittime/input.hook' % (app_home, app_name))
+
+            # Make hook executable.
+
+            st = os.stat('%s/%s/submittime/input.hook' % (app_home, app_name))
+            os.chmod('%s/%s/submittime/input.hook' % (app_home, app_name), st.st_mode | 0111)
+
+    if not options.submit_hook == 'none':
+
+        if logging is True:
+            log.write('\n\tSubmit: %s' % (options.submit_hook))
+
+        if os.path.exists(options.submit_hook):
+
+            if os.path.exists('%s/templates/submit.hook' % app_config):
+
+                sys.stderr.write('\nWARNING: You are overwriting a submit.hook file provided '
+                                 'as part of the application configuration you are using. This may '
+                                 'have adverse effects on your application.\n')
+
+            shutil.copy2(options.submit_hook, '%s/%s/submittime/submit.hook' % (app_home, app_name))
+
+            # Make hook executable.
+
+            st = os.stat('%s/%s/submittime/submit.hook' % (app_home, app_name))
+            os.chmod('%s/%s/submittime/submit.hook' % (app_home, app_name), st.st_mode | 0111)
+
+    if not options.start_hook == 'none':
+
+        if logging is True:
+            log.write('\n\tStart: %s' % (options.start_hook))
+
+        if os.path.exists(options.start_hook):
+
+            if os.path.exists('%s/templates/start.hook' % app_config):
+
+                sys.stderr.write('\nWARNING: You are overwriting a start.hook file provided '
+                                 'as part of the application configuration you are using. This may '
+                                 'have adverse effects on your application.\n')
+
+            shutil.copy2(options.start_hook, '%s/%s/runtime/start.hook' % (app_home, app_name))
+
+            # Make hook executable.
+
+            st = os.stat('%s/%s/runtime/start.hook' % (app_home, app_name))
+            os.chmod('%s/%s/runtime/start.hook' % (app_home, app_name), st.st_mode | 0111)
+
+    if not options.actions_hook == 'none':
+
+        if logging is True:
+            log.write('\n\tActions: %s' % (options.actions_hook))
+
+        if os.path.exists(options.actions_hook):
+
+            if os.path.exists('%s/templates/actions.hook' % app_config):
+
+                sys.stderr.write('\nWARNING: You are overwriting a actions.hook file provided '
+                                 'as part of the application configuration you are using. This may '
+                                 'have adverse effects on your application.\n')
+
+            shutil.copy2(options.actions_hook, '%s/%s/runtime/actions.hook' % (app_home, app_name))
+
+            # Make hook executable.
+
+            st = os.stat('%s/%s/runtime/actions.hook' % (app_home, app_name))
+            os.chmod('%s/%s/runtime/actions.hook' % (app_home, app_name), st.st_mode | 0111)
+
+    if not options.exit_hook == 'none':
+
+        if logging is True:
+            log.write('\n\tExit: %s' % (options.exit_hook))
+
+        if os.path.exists(options.exit_hook):
+
+            if os.path.exists('%s/templates/exit.hook' % app_config):
+
+                sys.stderr.write('\nWARNING: You are overwriting a exit.hook file provided '
+                                 'as part of the application configuration you are using. This may '
+                                 'cause adverse effects on your application.\n')
+
+            shutil.copy2(options.exit_hook, '%s/%s/runtime/exit.hook' % (app_home, app_name))
+
+            # Make hook executable.
+
+            st = os.stat('%s/%s/runtime/exit.hook' % (app_home, app_name))
+            os.chmod('%s/%s/runtime/exit.hook' % (app_home, app_name), st.st_mode | 0111)
+
+    ''' App Permissions '''
+
+    for dirName, subdirList, fileList in os.walk('%s/%s' % (app_home, app_name)):
+
+        if options.app_chmod:
+            os.chmod(dirName, int(options.app_chmod))
+        if options.app_chown:
+            (uid, gid) = options.app_chown.split(':', 1)
+            os.chown(dirName, int(uid), int(gid))
+
+        for fname in fileList:
+
+            path = '%s/%s' % (dirName, fname)
+
+            if options.app_chmod:
+                os.chmod('%s/%s' % (dirName, fname), int(options.app_chmod))
+
+            if options.app_chown:
+
+                (uid, gid) = options.app_chown.split(':', 1)
+                os.chown('%s/%s' % (dirName, fname), int(uid), int(gid))
+
+    ''' postsubmit.py Options '''
+
+    if (options.input_file_array is True):
+
+        if options.import_postsubmit is True:
+
+            qmgr = False
+
+            for path in os.environ.get('PATH', '').split(os.pathsep):
+                path = os.path.join(path, 'qmgr')
+
+                if os.path.exists(path):
+                    if os.access(path, os.X_OK):
+
+                        qmgr = True
+
+                        os.system('qmgr -c "delete hook postsubmit"')
+                        os.system('qmgr -c "create hook postsubmit"')
+                        os.system('qmgr -c "set hook postsubmit type = site"')
+                        os.system('qmgr -c "set hook postsubmit enabled = true"')
+                        os.system('qmgr -c "set hook postsubmit event = queuejob"')
+                        os.system('qmgr -c "import hook postsubmit application/x-python default %s/%s/submittime/postsubmit.py"'
+                                  % (app_home, app_name))
+
+            if qmgr is False:
+                sys.stderr.write('\nWARNING: Unable to find qmgr in your system path.\n')
+
+        elif options.import_postsubmit is False:
+
+            sys.stdout.write('\nWARNING: Some of the features of %s require the "postsubmit.py" PBS hook, an extension \n'
+                             'to the "presubmit.py" Submit Phase base script. Please ask your PBS administrator to import \n'
+                             'this hook via qmgr. Below you will see an example of how to import postsubmit.py manually.\n'
+                             'Alternatively, you can use the --import-postsubmit option to have it installed at creation time.\n\n'
+                             % app_name)
+
+            sys.stdout.write(
+                'create hook postsubmit\n'
+                'set hook postsubmit type = site\n'
+                'set hook postsubmit enabled = true\n'
+                'set hook postsubmit event = queuejob\n')
+
+            sys.stdout.write('\nimport hook postsubmit application/x-python default %s/%s/submittime/postsubmit.py\n\n'
+                             % (app_home, app_home))
+
+    sys.stdout.write('\nCreation summary for application %s.\n'
+                     '\n\tApp Home: \t%s'
+                     '\n\tApp Config: \t%s\n\n'
+                     % (app_name, app_home, app_config))
+
+    log.close()
+    sys.exit(0)
+
+else:
+
+    sys.stderr.write('Incorrect number of arguments. Try pas-appmaker --help for more information.\n')
+    sys.exit(1)
+
+sys.stdout.flush()
+sys.exit(0)

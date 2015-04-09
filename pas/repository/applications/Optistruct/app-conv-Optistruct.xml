@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationConverter xsi:schemaLocation="http://schemas.altair.com/pbs/2007/02/app-conv ../../schemas/app-conv.xsd" xmlns="http://schemas.altair.com/pbs/2007/02/app-conv" xmlns:app-def="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl" xmlns:jsdl-hpcp="http://schemas.ggf.org/jsdl/2006/07/jsdl-hpcp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ApplicationId>Optistruct</ApplicationId>
+    <ApplicationName>Optistruct</ApplicationName>
+    <ApplicationFileExtension>.fem</ApplicationFileExtension>
+    <HPCProfileApplication>
+        <jsdl-hpcp:Executable>$PYTHONPATH</jsdl-hpcp:Executable>
+        <jsdl-hpcp:Argument>runtime/start.py</jsdl-hpcp:Argument>
+        <jsdl-hpcp:Argument>$SOLVER_OPTIONS</jsdl-hpcp:Argument>
+        <jsdl-hpcp:Environment name="VERSION">$VERSION</jsdl-hpcp:Environment>
+        <jsdl-hpcp:Environment name="RESTART">$RESTART</jsdl-hpcp:Environment>
+        <jsdl-hpcp:Environment name="MASTER">$MASTER</jsdl-hpcp:Environment>
+        <jsdl-hpcp:Environment name="MEM">$MEM</jsdl-hpcp:Environment>
+        <jsdl-hpcp:Environment name="TOTAL_NCPUS">$NCPU</jsdl-hpcp:Environment>
+	<jsdl-hpcp:Environment name="ALTAIR_LICENSE_PATH">$ALTAIR_LICENSE_PATH</jsdl-hpcp:Environment>
+    </HPCProfileApplication>
+    <jsdl:Resources>
+	<Chunks>$NCPU</Chunks>
+        <TotalCPUCount>
+            <Exact>1</Exact>
+        </TotalCPUCount>
+        <TotalPhysicalMemory>
+            <Exact>$MEM</Exact>
+        </TotalPhysicalMemory>
+        <Software>optistruct</Software>
+        <CustomResource>
+            <Name>pas_applications_enabled</Name>
+	    <NodeLevel>true</NodeLevel>
+            <Value>Optistruct</Value>
+        </CustomResource>
+        <CustomResource>
+            <Name>hyperworks</Name>
+            <Value>4000 + ($NCPU * 1000)</Value>
+        </CustomResource>
+    <CustomResource>
+      <Name>platform</Name>
+      <Value>$PLATFORM</Value>
+      <NodeLevel>true</NodeLevel>
+    </CustomResource>
+    </jsdl:Resources>
+    <jsdl:DataStaging>
+        <jsdl:FileName>name($MASTER)</jsdl:FileName>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+        <jsdl:Source>
+            <jsdl:URI>$MASTER</jsdl:URI>
+        </jsdl:Source>
+    </jsdl:DataStaging>
+    <jsdl:DataStaging>
+        <jsdl:FileName>name($INCLUDE)</jsdl:FileName>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+        <jsdl:Source>
+            <jsdl:URI>$INCLUDE</jsdl:URI>
+        </jsdl:Source>
+    </jsdl:DataStaging>
+    <jsdl:DataStaging>
+        <jsdl:FileName>*</jsdl:FileName>
+        <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+        <jsdl:Target>
+            <jsdl:URI>$SUBMISSION_DIRECTORY/*</jsdl:URI>
+        </jsdl:Target>
+    </jsdl:DataStaging>
+</TemplateApplicationConverter>

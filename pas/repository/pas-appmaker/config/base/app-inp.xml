@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput xmlns="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ApplicationId>APP_NAME</ApplicationId>
+  <ApplicationName>APP_NAME</ApplicationName>
+  <!-- INPUT_TEMPLATE EXISTS -->
+  <!-- APPNAME_TEMPLATE EXISTS -->
+  <!-- PAS_SITE_VERSIONS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>SITE_VERSIONS</Name>
+      <Description>Please select which version of APP_NAME you would like to use.</Description>
+      <DisplayName>Site Versions</DisplayName>
+      <InputRequired>false</InputRequired>
+      <xi:include href="site-config.xml" xpointer="xpath1(//Application[@id='APP_NAME']/ApplicationVersions//Option)"/>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_SITE_VERSIONS END -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>JOB_NAME</Name>
+      <Description>The name of this APP_NAME job.</Description>
+      <DisplayName>Job Name</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_RESOURCES BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>RESOURCES</Name>
+      <Description>Manually specify the resource request of the APP_NAME job.</Description>
+      <DisplayName>Resources</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Value>software=APP_NAME select=1:ncpus=1:mem=100mb</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_RESOURCES END -->
+  <!-- PAS_SELECT BEGIN -->
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>SELECT</Name>
+      <Description>The number of chunks (nodes)</Description>
+      <DisplayName>Select (Nodes/Chunks)</DisplayName>
+      <InputRequired>false</InputRequired>
+      <LowerBound>1</LowerBound>
+      <UpperBound>128</UpperBound>
+      <Value>1</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentInt>
+  </ArgumentChoice>
+  <!-- PAS_SELECT END -->
+  <!-- PAS_NCPUS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentIntEnumerated>
+      <Name>NCPUS</Name>
+      <Description>The total number of processors.</Description>
+      <DisplayName>Number of Processors</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default="true">2</Option>
+      <Option>4</Option>
+      <Option>6</Option>
+      <Option>8</Option>
+      <Option>10</Option>
+      <Option>12</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentIntEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_NCPUS END -->
+  <!-- PAS_NGPUS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentIntEnumerated>
+      <Name>NGPUS</Name>
+      <Description>The total number of graphical processors.</Description>
+      <DisplayName>Number of Graphical Processors</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default="true">2</Option>
+      <Option>4</Option>
+      <Option>6</Option>
+      <Option>8</Option>
+      <Option>10</Option>
+      <Option>12</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentIntEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_NGPUS END -->
+  <!-- PAS_MPIPROCS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentIntEnumerated>
+      <Name>MPIPROCS</Name>
+      <Description>The total number of parallel processes.</Description>
+      <DisplayName>MPI Processors</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Option default="true">2</Option>
+      <Option>4</Option>
+      <Option>6</Option>
+      <Option>8</Option>
+      <Option>10</Option>
+      <Option>12</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentIntEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_MPIPROCS END -->
+  <!-- PAS_OMPTHREADS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentIntEnumerated>
+      <Name>OMPTHREADS</Name>
+      <Description>The total number of parallel processes.</Description>
+      <DisplayName>OMP Threads</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Option default="true">2</Option>
+      <Option>4</Option>
+      <Option>6</Option>
+      <Option>8</Option>
+      <Option>10</Option>
+      <Option>12</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentIntEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_OMPTHREADS END -->
+  <!-- PAS_MEM BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>MEM</Name>
+      <Description>The physical memory to request. You will need to specify the unit type.</Description>
+      <DisplayName>Physical Memory</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Value>1GB</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_MEM END -->
+  <!-- PAS_VMEM BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>VMEM</Name>
+      <Description>The virtual memory to use. You will need to specify the unit type.</Description>
+      <DisplayName>Virtual Memory</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Value>100mb</Value>      
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_VMEM END -->
+  <!-- PAS_WALLTIME BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>WALLTIME</Name>
+      <Description>The desired walltime (length) of the job duration.</Description>
+      <DisplayName>Walltime</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Value>01:00:00</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_WALLTIME END -->
+  <!-- PAS_ARCH BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>ARCH</Name>
+      <Description>Specify which system architecture to run your APP_NAME job on.</Description>
+      <DisplayName>Architecture</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_ARCH END -->
+  <!-- PAS_VNODE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>VNODE</Name>
+      <Description>Specify which vnode you would like to run this APP_NAME job on.</Description>
+      <DisplayName>VNode</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_VNODE END -->
+  <!-- PAS_PLACE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>PLACE</Name>
+      <Description>The placement of job resources.</Description>
+      <DisplayName>Placement of Resources</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Option default="true">pack</Option>
+      <Option>free</Option>
+      <Option>scatter</Option>
+      <Option>shared</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_PLACE END -->
+  <!-- PAS_ATTRIBUTES BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>ATTRIBUTES</Name>
+      <Description>Automatically include any of these ':' separated list of key/value attribute pairs.</Description>
+      <DisplayName>Attributes</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Value>group_list=user@hostname</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_ATTRIBUTES END -->
+  <!-- PAS_DEPEND BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>DEPEND</Name>
+      <Description>Specify which job ID this job will depend on and how.</Description>
+      <DisplayName>Dependancy</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_DEPEND END -->
+  <!-- PAS_GROUP_LIST BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>GROUP_LIST</Name>
+      <Description>Automatically include any of these ',' separted list of groups to run under this job.</Description>
+      <DisplayName>Group List</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_GROUP_LIST END -->
+  <!-- PAS_ACCOUNT BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>ACCOUNT</Name>
+      <Description>Specify the name of an account to associate with this job.</Description>
+      <DisplayName>Account</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_ACCOUNT END -->
+  <!-- PAS_PROJECT BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>PROJECT</Name>
+      <Description>Specify the project name to associate with this job.</Description>
+      <DisplayName>Project</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_ACCOUNT END -->
+  <!-- PAS_QUEUE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>QUEUE</Name>
+      <Description>Specify your desired queue.</Description>
+      <DisplayName>Queue</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Option>workq</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_QUEUE END -->
+  <!-- PAS_MAIL BEGIN -->
+  <ArgumentChoice>
+    <ArgumentStringMulti>
+      <Name>MAIL_EMAILS</Name>
+      <Description>A ';' separated list of email addresses to send notifications to. Example: sam@altair.com;bill@altair.com</Description>
+      <DisplayName>Email Notifications</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentStringMulti>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>MAIL_OPTIONS</Name>
+      <Description>Select when you would like to be notified of job activity. Either 'a' if the job has aborted, 'b' for before the job starts or 'e' when the job exits. Example: 'abe'.</Description>
+      <DisplayName>Notification Options</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default="true">No mail is sent</Option>
+      <Option>Mail sent at beginning of job</Option>
+      <Option>Mail sent at end of job</Option>
+      <Option>Mail sent on job abort</Option>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <!-- PAS_MAIL END -->
+  <!-- PAS_JOB_ARRAYS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>JOB_ARRAY_START_INDEX</Name>
+      <Description>The start index of a job array.</Description>
+      <DisplayName>Job Array Start Index</DisplayName>
+      <InputRequired>false</InputRequired>
+      <LowerBound>0</LowerBound>
+      <Value>0</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentInt>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>JOB_ARRAY_END_INDEX</Name>
+      <Description>The end index of a job array.</Description>
+      <DisplayName>Job Array End Index</DisplayName>
+      <InputRequired>false</InputRequired>
+      <LowerBound>1</LowerBound>
+      <Value>1</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentInt>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>JOB_ARRAY_STEPPING_FACTOR</Name>
+      <Description>The stepping factor of job array.</Description>
+      <DisplayName>Job Array Stepping Factor</DisplayName>
+      <InputRequired>false</InputRequired>
+      <LowerBound>1</LowerBound>
+      <Value>1</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentInt>
+  </ArgumentChoice>
+  <!-- PAS_JOB_ARRAYS END -->
+  <!-- PAS_SOFTWARE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>SOFTWARE</Name>
+      <Description>The name of your application.</Description>
+      <DisplayName>Software</DisplayName>
+      <InputRequired>false</InputRequired>
+      <Value>APP_NAME</Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_SOFTWARE END -->
+  <!-- PAS_ENVIRONMENT BEGIN -->
+  <ArgumentChoice>
+    <ArgumentStringMulti>
+      <Name>ENVIRONMENT</Name>
+      <Description>A ';' separated list of environment variables to make available to APP_NAME.</Description>
+      <DisplayName>APP_NAME Environment</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentStringMulti>
+  </ArgumentChoice>
+  <!-- PAS_ENVIRONMENT END -->
+  <!-- PAS_EXECUTABLE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>EXECUTABLE</Name>
+      <Description>A remote executable to run instead of a user supplied job script.</Description>
+      <DisplayName>Executable</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Value></Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_EXECUTABLE END -->
+  <!-- PAS_SCRIPT BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>SCRIPT</Name>
+      <Description>A job script to run instead of a remote executable.</Description>
+      <DisplayName>Job Script</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_SCRIPT END -->
+  <!-- PAS_ARGUMENTS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>ARGUMENTS</Name>
+      <Description>Pass specific arguments to the job script or remote executable.</Description>
+      <DisplayName>Arguments</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Value></Value>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentString>
+  </ArgumentChoice>
+  <!-- PAS_ARGUMENTS END -->
+  <!-- PAS_RUN_PARALLEL BEGIN -->
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>RUN_PARALLEL</Name>
+      <Description>Run your Executable and Script in parallel across all nodes.</Description>
+      <DisplayName>Run Parallel</DisplayName>
+      <FeatureEnabled>true</FeatureEnabled>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <!-- PAS_RUN_PARALLEL END -->
+  <!-- PAS_INPUT_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>INPUT_FILE</Name>
+      <Description>
+                A standalone input file or ZIP archive. This option supports the automatic detection of master, starter and engine files.
+            </Description>
+      <DisplayName>Input File</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_INPUT_FILE END -->
+  <!-- PAS_INPUT_FILE_ARRAY BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileNameMulti>
+      <Name>INPUT_FILE_ARRAY</Name>
+      <Description>Select your Input File (s). Each Input File will be executed inside of its own Job Array index.</Description>
+      <DisplayName>Input File Array</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileNameMulti>
+  </ArgumentChoice>
+  <!-- PAS_INPUT_FILE_ARRAY END -->
+  <!-- PAS_MASTER_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>MASTER_FILE</Name>
+      <Description>
+                A standalone master file or ZIP archive containing a master file.
+            </Description>
+      <DisplayName>Master File</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_MASTER_FILE END -->
+  <!-- PAS_STARTER_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>STARTER_FILE</Name>
+      <Description>
+            A standalone starter file or ZIP archive containing a starter file.
+        </Description>
+      <DisplayName>Starter File</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_STARTER_FILE END -->
+  <!-- PAS_ENGINE_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>ENGINE_FILE</Name>
+      <Description>
+                A standalone engine file or ZIP archive containing a engine file.
+            </Description>
+      <DisplayName>Engine File</DisplayName>
+      <InputRequired>true</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_ENGINE_FILE END -->
+  <!-- PAS_RESTART_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>RESTART_FILE</Name>
+      <Description>
+                A standalone restart file or ZIP archive containing a restart file.
+            </Description>
+      <DisplayName>Restart File</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_RESTART_FILE END -->
+  <!-- PAS_NASTRAN_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>NASTRAN_FILE</Name>
+      <Description>
+                A standalone nastran file or ZIP archive containing a nastran file.
+            </Description>
+      <DisplayName>Nastran File</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_NASTRAN_FILE END -->
+  <!-- PAS_PARAMETER_FILE BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>PARAMETER_FILE</Name>
+      <Description>
+                A standalone parameter file or ZIP archive containing a parameter file.
+            </Description>
+      <DisplayName>Parameter File</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <!-- PAS_PARAMETER_FILE END -->
+  <!-- PAS_ADDITIONAL_FILES BEGIN -->
+  <ArgumentChoice>
+    <ArgumentFileNameMulti>
+      <Name>ADDITIONAL_FILES</Name>
+      <Description>Automatically stage any additional files to the APP_NAME jobs working directory.</Description>
+      <DisplayName>Additional Files</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentFileNameMulti>
+  </ArgumentChoice>
+  <!-- PAS_ADDITIONAL_FILES END -->
+  <!-- PAS_ATTACH_DIRECTORY BEGIN -->
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>ATTACH_DIRECTORY</Name>
+      <Description>Attach a directory filled with files to the APP_NAME job.</Description>
+      <DisplayName>Attach Directory</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+  <!-- PAS_ATTACH_DIRECTORY END -->
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>SUBMISSION_DIRECTORY</Name>
+      <Description>Where your job files will initially be staged, and results will be returned upon job completion.</Description>
+      <DisplayName>Staging Directory</DisplayName>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+  <!-- PAS_CONVERT_TO_UNIX BEGIN -->
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>CONVERT_TO_UNIX</Name>
+      <Description>Convert the line endings of all files to UNIX format.</Description>
+      <DisplayName>Convert to UNIX</DisplayName>
+      <InputRequired>false</InputRequired>
+      <FeatureEnabled>true</FeatureEnabled>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <!-- PAS_NORMALIZE_ARCHIVES BEGIN -->
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>NORMALIZE_ARCHIVES</Name>
+      <Description>Automatically uncompress any attached .zip files. Additionally master, starter, engine and restart files will be automatically identified.</Description>
+      <DisplayName>Normalize Archives</DisplayName>
+      <InputRequired>false</InputRequired>
+      <FeatureEnabled>true</FeatureEnabled>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <!-- PAS_NORMALIZE_ARCHIVES END -->
+  <!-- PAS_TRANSFER_INCLUDE_FILES BEGIN -->
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>TRANSFER_INCLUDE_FILES</Name>
+      <Description>Automatically transfer any remote files mentioned as include statements.</Description>
+      <DisplayName>Transfer Include Files</DisplayName>
+      <InputRequired>false</InputRequired>
+      <FeatureEnabled>true</FeatureEnabled>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <!-- PAS_TRANSFER_INCLUDE_FILES END -->
+  <!-- PAS_COMPRESS_RESULTS BEGIN -->
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>COMPRESS_RESULTS</Name>
+      <Description>Compress job results into a single ZIP file.</Description>
+      <DisplayName>Compress Results</DisplayName>
+      <FeatureEnabled>true</FeatureEnabled>
+      <InputRequired>false</InputRequired>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <!-- PAS_COMPRESS_RESULTS END -->
+  <!-- PAS_LOGGING BEGIN -->
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>LOGGING</Name>
+      <Description>Enable logging. Useful for development and debugging.</Description>
+      <DisplayName>Logging</DisplayName>
+      <InputRequired>false</InputRequired>
+      <FeatureEnabled>true</FeatureEnabled>
+      <!-- PAS_DYNAMIC BEGIN -->
+      <!-- RefreshOnUpdate>false</RefreshOnUpdate -->
+      <!-- PAS_DYNAMIC END -->
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <!-- PAS_LOGGING END -->
+  <!-- PAS_DYNAMIC BEGIN -->
+  <!-- RefreshScript>input.py</RefreshScript -->
+  <!-- DefaultRefresh>false</DefaultRefresh -->
+  <!-- PAS_DYNAMIC END -->
+      
+</TemplateApplicationInput>

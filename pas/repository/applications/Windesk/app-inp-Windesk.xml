@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput
+   
+   xmlns="http://schemas.altair.com/pbs/2007/02/app-def"
+   xmlns:xi="http://www.w3.org/2001/XInclude"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  <ApplicationId>Windesk</ApplicationId>
+  <ApplicationName>Windesk</ApplicationName>
+
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>JOB_NAME</Name>
+      <Description>The name of the job.</Description>
+      <DisplayName>Job Name</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentString>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>JOB_TYPE</Name>
+      <Description>The type of the job.</Description>
+      <DisplayName>Job Type</DisplayName>
+      <Option>hw</Option>
+      <Option>hm</Option>
+      <InputRequired>true</InputRequired>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+      <Name>CONNECT_ENABLED</Name>
+      <Description>CONNECT_ENABLED</Description>
+      <InputRequired>true</InputRequired>
+      <DefaultValue>true</DefaultValue>
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>AAA</Name>
+      <Description>aaa</Description>
+      <DisplayName>Output Directory</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentDirectoryNameMulti>
+      <Name>BBB</Name>
+      <Description>aaa</Description>
+      <DisplayName>Output Directory</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryNameMulti>
+  </ArgumentChoice>
+
+
+  <!-- For PBS Desktop ONLY! -->
+
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>SUBMISSION_DIRECTORY</Name>
+      <Description>Result files will be placed here by PBS Desktop.</Description>
+      <DisplayName>Output Directory</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+
+</TemplateApplicationInput>

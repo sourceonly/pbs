@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput xmlns="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.altair.com/pbs/2007/02/app-def ../../schemas/app-def.xsd">
+    <ApplicationId>Optistruct</ApplicationId>
+    <ApplicationName>Optistruct</ApplicationName>
+    <ApplicationExtension>.fem</ApplicationExtension>
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>VERSION</Name>
+            <Description>Version</Description>
+            <DisplayName>Version</DisplayName>
+            <InputRequired>true</InputRequired>
+            <xi:include href="site-config.xml" xpointer="xpath1(//Application[@id='Optistruct']/ApplicationVersions//Option)" />
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>JOB_NAME</Name>
+            <Description>Job Name</Description>
+            <DisplayName>Job Name</DisplayName>
+            <InputRequired>true</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>PLATFORM</Name>
+      <Description>Which Platform want to use</Description>
+      <DisplayName>platform</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default='true'>Xeon4c-4g</Option>
+      <Option>Xeon12c-32g</Option>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>REPORT</Name>
+      <Description>REPORT</Description>
+      <DisplayName>REPORT</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default='true'>yes</Option>
+      <Option>no</Option>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+
+
+
+    <ArgumentChoice>
+        <ArgumentIntEnumerated>
+            <Name>NCPU</Name>
+            <Description>Number of CPUs</Description>
+            <DisplayName>Number of CPUs</DisplayName>
+            <InputRequired>true</InputRequired>
+            <Option>1</Option>
+            <Option>2</Option>
+            <Option>3</Option>
+        </ArgumentIntEnumerated>
+    </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>MEM</Name>
+      <Description>Requested memory</Description>
+      <DisplayName>Memory required</DisplayName>
+      <InputRequired>false</InputRequired>
+      <LowerBound>64</LowerBound>
+      <Value>1024</Value>
+    </ArgumentInt>
+  </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentDirectoryName>
+            <Name>SUBMISSION_DIRECTORY</Name>
+            <Description>Local Project Directory</Description>
+	<DisplayName>Project Directory</DisplayName>
+            <InputRequired>true</InputRequired>
+        </ArgumentDirectoryName>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentFileName>
+            <Name>MASTER</Name>
+            <Description>Master File</Description>
+            <DisplayName>Master File</DisplayName>
+            <InputRequired>true</InputRequired>
+            <StageinRequired>true</StageinRequired>
+        </ArgumentFileName>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentFileNameMulti>
+            <Name>INCLUDE</Name>
+            <Description>Include File(s)</Description>
+            <DisplayName>Include File(s)</DisplayName>
+            <InputRequired>false</InputRequired>
+            <StageinRequired>true</StageinRequired>
+            <Value/>
+        </ArgumentFileNameMulti>
+    </ArgumentChoice>
+</TemplateApplicationInput>

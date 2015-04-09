@@ -1,0 +1,107 @@
+<h1>pas-appmaker/docs/installation</h1>
+
+<p>A framework for creating powerful application definitions.</p>
+
+<h2>Introduction</h2>
+
+<p>This document is for administrators who are deploying pas-appmaker in their environment for the first time.
+If you are an application author and would like to create applications with pas-appmaker, please read the pas-appmaker/docs/tutorials document to learn how.</p>
+
+<h3>Required: App Home</h3>
+
+<p>The application home/ directory is where your application definitions will be placed at creation time. </p>
+
+<pre><code>export PAS_APP_HOME=/var/spool/pas/repository/applications
+</code></pre>
+
+<p>or</p>
+
+<pre><code>pas-appmaker Appname --app-home /path/to/pas/repository/applications
+</code></pre>
+
+<h3>Required: App Config</h3>
+
+<p>The application config/ directory is where your pas-appmaker base and template files are located.</p>
+
+<pre><code>export PAS_APP_CONFIG=/var/spool/pas/repository/pas-appmaker/config
+</code></pre>
+
+<p>or</p>
+
+<pre><code>pas-appmaker Appname --app-config /path/to/pas-appmaker/config
+</code></pre>
+
+<h3>Optional: postsubmit.py</h3>
+
+<p>pas-appmaker has an extension to the PAS presubmit.py hook called postsubmit.py. postsubmit.py was created
+to bridge the gaps between the PBS job object available to presubmit.py, and the job object available to queuejob hooks in PBS.
+Because of this, postsubmit.py allows pas-appmaker functionality never before possible with typical application definitions.</p>
+
+<pre><code>qmgr -c "create hook postsubmit"
+qmgr -c "set hook postsubmit type = site"
+qmgr -c "set hook postsubmit enabled = true"
+qmgr -c "set hook postsubmit event = queuejob"
+
+qmgr -c "import hook postsubmit application/x-python default /path/to/app/config/base/postsubmit.py"
+</code></pre>
+
+<p>or
+    qmgr -c "import hook postsubmit application/x-python default /path/to/app/config/template/postsubmit.py"</p>
+
+<h3>Recomended: App Environment</h3>
+
+<p>Make these adjustments to have CM and PAS refresh your applications every minute.
+Additionally you can configure the authors environment, too.</p>
+
+<h4>Compute Manager (12.0.1 and below)</h4>
+
+<p>Check PAS for updated applications every minute.</p>
+
+<pre><code>vim /opt/altair/pbsworks/12.0/services/cm/config/spring-config.xml
+
+&lt;bean id="updateAppTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean"&gt;
+    &lt;property name="jobDetail"&gt;
+        &lt;ref bean="updateAppBean" /&gt;
+    &lt;/property&gt;
+    &lt;property name="cronExpression"&gt;
+        &lt;value&gt;0 * * * * ?&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+
+<h4>PBS Application Services</h4>
+
+<p>Remove the time_stamp.txt file every minute.</p>
+
+<pre><code>vim /etc/cron.d/pas-timestamp-remove
+
+* * * * * root rm -rf /var/spool/pas/repository/time_stamp.txt
+</code></pre>
+
+<h4>Author Environment</h4>
+
+<p>Automatic environment setup on login.</p>
+
+<pre><code>vim /etc/profile.d/pas-appmaker-environment.sh 
+
+export PAS_APP_HOME=/var/spool/pas/repository/applications/
+export PAS_APP_CONFIG=/var/spool/pas/repository/pas-appmaker/config/
+export PATH=$PATH:/var/spool/pas/repository/pas-appmaker/
+</code></pre>
+
+<h3>Optional: Download Nightly Builds</h3>
+
+<p>You can download and deploy daily pas-appmaker updates from the Altair ftp.</p>
+
+<pre><code>vim /etc/cron.daily/pas-appmaker-update
+
+#!/bin/sh
+
+cd /var/spool/pas/repository
+wget ftp://ftp.altair.com/pub/outgoing/pas-appmaker/pas-appmaker-`date +%F`.tar.gz
+tar -xvf pas-appmaker-`date +%F`.tar.gz
+</code></pre>
+
+<h2>Copyright</h2>
+
+<p>(c) Copyright 2013 - 2014 Altair Engineering, Inc. All rights reserved.</p>

@@ -1,0 +1,354 @@
+<h1>pas-appmaker/docs/architecture</h1>
+
+<p>A framework for creating powerful application definitions.</p>
+
+<h3>Application Creation</h3>
+
+<p>The pas-appmaker command line tool can be used to create a base application definition.  Once the application definition is created its functionality can then be extended using hooks, templates, and enviroment variables.</p>
+
+<p>The only command argument required by the pas-appmaker command is the name of the application. <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>pas-appmaker [OPTION]... [APPNAME]</em>  </p>
+
+<p>If you create the simplest application the following files will be created in the /var/spool/pas/repository/applications directory: <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>pas-appmaker MyApp</em>  </p>
+
+<pre><code>total 24
+-rw-r--r-- 1 root root  276 May 30 07:41 app-actions-MyApp.xml
+-rw-r--r-- 1 root root  888 May 30 07:41 app-conv-MyApp.xml
+-rw-r--r-- 1 root root 1360 May 30 07:41 app-inp-MyApp.xml
+-rw-r--r-- 1 root root 1024 May 30 07:41 app-summary-MyApp.log
+drwxr-xr-x 2 root root 4096 May 30 07:41 runtime
+drwxr-xr-x 2 root root 4096 May 30 07:41 submittime
+
+ ./runtime:
+total 32
+-rwxr-xr-x 1 root root  5816 May 30 07:41 actions.py
+-rwxr-xr-x 1 root root  5020 May 30 07:41 exit.py
+-rw-r--r-- 1 root root 14949 May 30 07:41 start.py
+
+./submittime:
+total 24
+-rwxr-xr-x 1 root root   223 May 30 07:41 input.py
+-rwxr-xr-x 1 root root  2137 May 30 07:41 postsubmit.py
+-rwxr-xr-x 1 root root 13890 May 30 07:41 presubmit.py
+</code></pre>
+
+<h3>Files in the Application Directory</h3>
+
+<ul>
+<li>app-actions-AppName.xml ------- appplication action file</li>
+<li>app-conv-AppName.xml ---------- application converter file</li>
+<li>app-inp-AppName.xml ------------ application input file</li>
+<li>app-summary-AppName.log ---- application build summary log file  </li>
+</ul>
+
+<h4>Application Input File</h4>
+
+<p>The application input file is where arguments are defined for a given application.  You can edit this file to add application arguments, remove application arguments, or tune existing arguments per site nomenclature. <br />
+<strong><em>Warning:</em></strong> <br />
+Changing the value of the <strong>&lt;Name&gt;</strong> XML element of any of the pas-appmaker base arguments may have adverse effects on your application definition.  Modifications of this kind should only be done by advanced application definition authors. </p>
+
+<h4>Application Converter File</h4>
+
+<p>The application converter file takes the values of the application arguments defined in the application input file and communicates this information to PBS Application Services.  This file allows the job submission environment to be configured. <br />
+<strong><em>Warning:</em></strong> <br />
+Changing the value of the <strong>&lt;jsdl:FileName&gt;</strong> XML element of any of the pas-appmaker base filename arguments may have adverse effects on your application definition.  Modifications of this kind should only be done by advanced application definition authors. </p>
+
+<h4>Application Action File</h4>
+
+<p>The application action file defines the arguments, applicable job state, and executable for an application action.  An application action allows some type of action to be performed on a application.  For instance, sending a signal to an application to terminate.</p>
+
+<h4>Application Build Summary Log File</h4>
+
+<p>Log file that summarizes the arguments, files, actions, and hooks that were enabled for the application definition.</p>
+
+<h3>Files in the Runtime Directory</h3>
+
+<ul>
+<li>actions.py ---- appplication action runtime script</li>
+<li>exit.py --------- application exit script</li>
+<li>start.py -------- application runtime script</li>
+</ul>
+
+<p><strong><em>Warning:</em></strong> <br />
+The base pas-appmaker scripts found in the runtime directory should NOT be modified by application definition authors.  Use hooks or environment variables to extend their functionality.</p>
+
+<h4>Application Action Runtime Script</h4>
+
+<p>Python script that performs the application action.</p>
+
+<h4>Application Exit Script</h4>
+
+<p>Python script that performs any actions that should occur when an application reaches the exit phase.</p>
+
+<h4>Application Runtime Script</h4>
+
+<p>Python script file which is the primary execution script.  This script file is responsible for executing the application using the information entered by the user (defined by the application input file), and converted (via the application converter file).</p>
+
+<h3>Files in the Submittime Directory</h3>
+
+<ul>
+<li>input.py ------------- application input script</li>
+<li>postsubmit.py ----- application post-submit script</li>
+<li>presubmit.py ------ application pre-submit script</li>
+</ul>
+
+<h4>Application Input Script</h4>
+
+<p>Python script that performs any actions that should occur when an application reaches the input phase.</p>
+
+<h4>Application Pre-Submit Script</h4>
+
+<p>Python script that performs any actions that should occur when an application reaches the pre-submit phase.</p>
+
+<h4>Application Post-Submit Script</h4>
+
+<p>Python script that performs any actions that should occur when an application reaches the post-submit phase.</p>
+
+<h3>Application Lifecycle</h3>
+
+<h2>Life Cycle of an Application</h2>
+
+<p>There are two main application phases that are divided into sub-phases:
+* Submittime
+  - Input
+  - Submit
+* Runtime
+  - Start
+  - Actions
+  - Exit</p>
+
+<h3>Input phase</h3>
+
+<p>The input phase begins when a user displays a job submission form in Computer Manager and enter arguments for the application.  It ends when the <em>Submit</em> button is clicked.  </p>
+
+<p>The information contained in the application input file is used during the input phase to communicate the available application arguments to CM.</p>
+
+<h3>Submit phase</h3>
+
+<p>The submit phase begins when a user clicks the <em>Submit</em> button.  It ends when the job is received by PBS Professional and placed into a queue.</p>
+
+<p>The submit phase processes and validates the arguments entered for the application.  It verifies the existence of and permissions of job files.  It constructs the job attributes and job resource request.</p>
+
+<p>It then creates an application object containing all the information necessary to execute the application.</p>
+
+<h4>Application environment variables</h4>
+
+<p>Any arguments supplied during the input phase will be saved as environment variables.  These environment variables are persisted throughout each phase of the application life cycle.  The naming convention for these environment variables is PAS_ARGNAME where ARGNAME is the name of the application argument as defined by the XML element <strong>&lt;NAME&gt;</strong> in the application input file. </p>
+
+<h4>Script Files Responsible for Submit Phase Activities</h4>
+
+<p>presubmit.py ------ resource and attribute processing <br />
+postsubmit.py ---- bridges the gap for features that are not supported by PAS using a qsub hook.</p>
+
+<h3>Start phase</h3>
+
+<p>The start phase begins when the job reaches a running state.</p>
+
+<p>The start phase is responsible for starting the application.</p>
+
+<h4>Script Files Responsible for Start Phase Activities</h4>
+
+<p>start.py ------ starts execution of the application  </p>
+
+<h3>Actions phase</h3>
+
+<p>The actions phase is initiated by the user when an application action is requested using Compute Manager.  </p>
+
+<p>The actions phase is responsible for starting and executing the application action.  </p>
+
+<h4>Script Files Responsible for Action Phase Activities</h4>
+
+<p>actions.py ------ executes the application action  </p>
+
+<h3>Exit phase</h3>
+
+<p>The exit phase begins when the job completes.</p>
+
+<p>It is responsible for any application post-processing and clean-up, for instance, compressing all job results files.</p>
+
+<h4>Script Files Responsible for Exit Phase Activities</h4>
+
+<p>exit.py ------ performs any necessary post-processing  </p>
+
+<h3>Environment Files</h3>
+
+<p>Application definition authors can extend the functionality of an application definition by implementing environment files.  </p>
+
+<p>An environment file contains key-value pairs in the format:</p>
+
+<p>&lt;ENV<em>VAR</em>NAME&gt;=&lt;VALUE&gt;  </p>
+
+<p>Where &lt;ENV<em>VAR</em>NAME&gt; is the name of an environment variable and &lt;VALUE&gt; is its value.</p>
+
+<p>Each phase has its own environment file, except for the input phase.  The naming convention for environment files is <em>phaseName.environment</em>: <br />
+* submit.environment ---- place file in submittime directory of application definition <br />
+* start.environment ------- place file in runtime directory of application definition
+* action.environment ----- place file in runtime directory of application definition
+file
+* exit.environment -------- place file in runtime directory of application definition</p>
+
+<p>When an application phase begins, the environment file will be read, and any environment variables contained in the file will be processed and added to the application's environment.  Authors can add environment variables and override existing environment variables in this way. </p>
+
+<h4>How Are Environment Variables Processed</h4>
+
+<p>If the environment variable is already defined in the application's environment, then its value will be overlaid. Otherwise, the variable will be added to the application's environment. Any environment variables prefixed with "PAS_" will persist to the subsequent application phase. Otherwise, the environment variable will only exist during the application's phase.</p>
+
+<p>As long as an environment file exists, is located in the correct application definition directory, and the application has permission to read it, then the environment file will be processed.</p>
+
+<h4>Environment File Example</h4>
+
+<p>This is an example of a start.environment file:</p>
+
+<pre><code>PAS_EXECUTABLE=/bin/sleep
+PAS_ARGUMENTS=30
+</code></pre>
+
+<h4>Environment Variable Substitution</h4>
+
+<p>Substitution of environment variable values is supported within an environment file.  In the example below, the environment variable for the number of graphical CPUs will be set to the value of the number of CPUs.</p>
+
+<pre><code>PAS_NGPUS=PAS_NCPUS
+</code></pre>
+
+<p>You can also use the --phasename-environment=&lt;var&gt;=&lt;valueE&gt;,&lt;var&gt;=&lt;value&gt; command line option to define phase environment variables.</p>
+
+<h3>Hooks</h3>
+
+<p>Application definition authors can extend the functionality of an application definition by using hooks.  </p>
+
+<p>An hook is a script written in any language.  You can use the hook to manipulate the application object to set up the environment specific to your site's needs.</p>
+
+<p>Each phase has its own hook, except for the input phase.  The naming convention for hook files is <em>phaseName.hook</em>: <br />
+* submit.hook ---- place hook in submittime directory of application definition <br />
+* start.hook ------- place hook in runtime directory of application definition 
+* action.hook ----- place hook in runtime directory of application definition <br />
+* exit.hook -------- place hook in runtime directory of application definition</p>
+
+<p>When an application phase begins, the environment file will be processed first.  Once the environment is in place, then the phase hook will be executed.</p>
+
+<p>As long as a hook file exists, is located in the correct application definition directory, is executable, and the application has permissions to run it, then the hook will be executed.</p>
+
+<p>You can also use the --phasename-hook /path/to/my/hook.pl command line option to tell pas-appmaker the location of your hook.</p>
+
+<h3>Templates</h3>
+
+<p>Pre-defined template files can be used to override or add to base appmaker behavior.  This is especially powerful for administrators wanting to apply common or application specific input arguments, hooks or environment files.</p>
+
+<h4>Template Directory</h4>
+
+<p>The template directory is <em>/var/spool/pas/repository/pas-appmaker/config/templates</em>.</p>
+
+<h4>Template Use Case</h4>
+
+<p>For instance, to change the <strong>&lt;Input<em>Required&gt;</strong> of XML element <strong>&lt;NCPUS&gt;</strong> for all your site's applications from the default of "true" to "false", you could edit every application input file and change the value of <strong>&lt;Input</em>Required&gt;</strong> to "false".</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentIntEnumerated&gt;
+        &lt;Name&gt;NCPUS&lt;/Name&gt;
+        &lt;Description&gt;The total number of processors.&lt;/Description&gt;
+        &lt;DisplayName&gt;Number of Processors&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;true&lt;/InputRequired&gt;                 ---Change true to false
+        &lt;Option default="true"&gt;2&lt;/Option&gt;
+        &lt;Option&gt;4&lt;/Option&gt;
+        &lt;Option&gt;6&lt;/Option&gt;
+        &lt;Option&gt;8&lt;/Option&gt;
+        &lt;Option&gt;10&lt;/Option&gt;
+        &lt;Option&gt;12&lt;/Option&gt;
+    &lt;/ArgumentIntEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Or you could use a template to override the base application argument.</p>
+
+<h4>Global Input Template</h4>
+
+<p>Create a file called <em>app-inp.xml</em> and place the following XML in the file - notice that the XML sets <strong>&lt;Input_Required&gt;</strong> to "false" :</p>
+
+<pre><code>&lt;ArgumentChoice&gt;
+    &lt;ArgumentIntEnumerated&gt;
+        &lt;Name&gt;NCPUS&lt;/Name&gt;
+        &lt;Description&gt;The total number of processors.&lt;/Description&gt;
+        &lt;DisplayName&gt;Number of Processors&lt;/DisplayName&gt;
+        &lt;InputRequired&gt;false&lt;/InputRequired&gt;                  
+        &lt;Option default="true"&gt;2&lt;/Option&gt;
+        &lt;Option&gt;4&lt;/Option&gt;
+        &lt;Option&gt;6&lt;/Option&gt;
+        &lt;Option&gt;8&lt;/Option&gt;
+        &lt;Option&gt;10&lt;/Option&gt;
+        &lt;Option&gt;12&lt;/Option&gt;
+    &lt;/ArgumentIntEnumerated&gt;
+&lt;/ArgumentChoice&gt;
+</code></pre>
+
+<p>Place the <em>app-inp.xml</em> file in the template directory.  This will append the custom argument to the end of all appmaker generated argument input files, and appmaker will override the base input argument.</p>
+
+<p>You can also use templates to add new input arguments to appmaker.</p>
+
+<h4>Application Specific Input Template</h4>
+
+<p>If you would like to append only a specific application's arguments, create a file called <em>app-inp-appname.xml</em> and place it in the template directory.  This will append application specific arguments to the end of any appmaker generated application definition that match the correct application name.</p>
+
+<h4>Global Converter Template</h4>
+
+<p>Similarly, you can also append data staging directives to the end of all appmaker generated input converter files using the file <em>app-conv.xml</em> and placing it in the template directory.</p>
+
+<pre><code>&lt;jsdl:DataStaging&gt;    
+    &lt;jsdl:FileName&gt;name($STAGE_SOMETHING)&lt;/jsdl:FileName&gt;
+    &lt;jsdl:CreationFlag&gt;overwrite&lt;/jsdl:CreationFlag&gt;
+
+    &lt;jsdl:Source&gt;
+          &lt;jsdl:URI&gt;$STAGE_SOMETHING&lt;/jsdl:URI&gt;
+    &lt;/jsdl:Source&gt;
+&lt;/jsdl:DataStaging&gt;
+</code></pre>
+
+<h4>Application Specific Converter Template</h4>
+
+<p>If you would like to append only a specific application's data staging directives, create a file called <em>app-conv-appname.xml</em> and place it in the template directory.  This will append application specific directives to the end of any appmaker generated application definition that match the correct application name.</p>
+
+<h4>The following templates are supported.</h4>
+
+<p>Templates can be used for input arguments, data staging directives, hooks, application actions, and environment files.</p>
+
+<p>Input Files</p>
+
+<pre><code>app-inp.xml
+app-inp-appname.xml
+app-conv.xml
+app-conv-appname.xml
+app-actions.xml
+app-actions-appname.xml
+input.hook
+input.environment
+</code></pre>
+
+<p>Submit Files</p>
+
+<pre><code>submit.hook
+submit.environment
+</code></pre>
+
+<p>Start Files</p>
+
+<pre><code>start.hook
+start.environment
+</code></pre>
+
+<p>Actions Files</p>
+
+<pre><code>app-actions.xml
+app-actions-appname.xml
+actions.hook
+actions.environment
+</code></pre>
+
+<p>Exit Files</p>
+
+<pre><code>exit.hook
+exit.environment
+</code></pre>
+
+<h2>Copyright</h2>
+
+<p>© Copyright 2013 - 2014 Altair Engineering, Inc. All rights reserved.</p>

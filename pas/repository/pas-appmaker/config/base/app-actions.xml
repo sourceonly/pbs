@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationActions xmlns="http://schemas.altair.com/pbs/2009/01/app-actions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ApplicationId>APP_NAME</ApplicationId>
+  <ApplicationName>APP_NAME</ApplicationName>
+  <!-- ACTIONS_TEMPLATE EXISTS -->
+  <!-- APPNAME_TEMPLATE EXISTS -->
+  <!-- PAS_SEND_SIGNALS BEGIN -->
+  <CustomAction>
+    <JobStates>
+      <JobState>RUNNING</JobState>
+    </JobStates>
+    <Name>SEND_SIGNALS</Name>
+    <DisplayName>Send Signals</DisplayName>
+    <Description>Send UNIX signals to your jobs process.</Description>
+    <ArgumentChoice>
+      <ArgumentStringEnumerated>
+        <Name>SEND_SIGNALS</Name>
+        <Description>Select which signal to send.</Description>
+        <DisplayName>Signal</DisplayName>
+        <InputRequired>true</InputRequired>
+        <Option>Suspend</Option>
+        <Option>Resume</Option>
+        <Option default="true">Terminate</Option>
+      </ArgumentStringEnumerated>
+    </ArgumentChoice>
+    <Executable>
+      <Language>PYTHON</Language>
+      <Name>actions.py</Name>
+    </Executable>
+    <ShowOutput>true</ShowOutput>
+  </CustomAction>
+  <!-- PAS_SEND_SIGNALS END -->
+  <!-- PAS_SHELL_COMMAND BEGIN -->
+  <CustomAction>
+    <JobStates>
+      <JobState>RUNNING</JobState>
+    </JobStates>
+    <Name>SHELL_COMMAND</Name>
+    <DisplayName>Shell Command</DisplayName>
+    <Description>Execute a shell command in your jobs execution directory.</Description>
+    <ArgumentChoice>
+      <ArgumentString>
+        <Name>SHELL_COMMAND</Name>
+        <Description>Run this shell command.</Description>
+        <DisplayName>Command</DisplayName>
+        <InputRequired>true</InputRequired>
+      </ArgumentString>
+    </ArgumentChoice>
+    <Executable>
+      <Language>PYTHON</Language>
+      <Name>actions.py</Name>
+    </Executable>
+    <ShowOutput>true</ShowOutput>
+  </CustomAction>
+  <!-- PAS_SHELL_COMMAND END -->
+</ApplicationActions>

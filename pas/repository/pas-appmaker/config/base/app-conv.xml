@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationConverter xmlns="http://schemas.altair.com/pbs/2007/02/app-conv" xmlns:app-def="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl" xmlns:jsdl-hpcp="http://schemas.ggf.org/jsdl/2006/07/jsdl-hpcp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ApplicationId>APP_NAME</ApplicationId>
+  <ApplicationName>APP_NAME</ApplicationName>
+  <HPCProfileApplication>
+    <jsdl-hpcp:Executable>$PYTHONPATH</jsdl-hpcp:Executable>
+    <jsdl-hpcp:Argument>runtime/start.py</jsdl-hpcp:Argument>
+  </HPCProfileApplication>
+  <jsdl:Resources/>
+  <!-- CONVERTER_TEMPLATE EXISTS -->
+  <!-- APPNAME_TEMPLATE EXISTS -->
+  <!-- PAS_JOB_ARRAYS BEGIN -->
+  <jsdl:JobArrayAttributes>
+    <jsdl:StartIndex>$JOB_ARRAY_START_INDEX</jsdl:StartIndex>
+    <jsdl:EndIndex>$JOB_ARRAY_END_INDEX</jsdl:EndIndex>
+    <jsdl:SteppingFactor>$JOB_ARRAY_STEPPING_FACTOR</jsdl:SteppingFactor>
+  </jsdl:JobArrayAttributes>
+  <!-- PAS_JOB_ARRAYS END -->
+  <!-- PAS_SCRIPT BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($SCRIPT)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$SCRIPT</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_SCRIPT END -->
+  <!-- PAS_INPUT_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($INPUT_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$INPUT_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_INPUT_FILE END -->
+  <!-- PAS_INPUT_FILE_ARRAY BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($INPUT_FILE_ARRAY)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$INPUT_FILE_ARRAY</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_INPUT_FILE_ARRAY END -->
+  <!-- PAS_MASTER_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($MASTER_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$MASTER_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_MASTER_FILE END -->
+  <!-- PAS_STARTER_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($STARTER_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$STARTER_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_STARTER_FILE END -->
+  <!-- PAS_ENGINE_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($ENGINE_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$ENGINE_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_ENGINE_FILE END -->
+  <!-- PAS_RESTART_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($RESTART_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$RESTART_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_RESTART_FILE END -->
+  <!-- PAS_NASTRAN_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($NASTRAN_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$NASTRAN_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_NASTRAN_FILE END -->
+  <!-- PAS_PARAMETER_FILE BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($PARAMETER_FILE)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$PARAMETER_FILE</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_PARAMETER_FILE END -->
+  <!-- PAS_ADDITIONAL_FILES BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($ADDITIONAL_FILES)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$ADDITIONAL_FILES</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_ADDITIONAL_FILES END -->
+  <!-- PAS_ATTACH_DIRECTORY BEGIN -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($ATTACH_DIRECTORY)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$ATTACH_DIRECTORY</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <!-- PAS_ATTACH_DIRECTORY END -->
+  <jsdl:DataStaging>
+    <jsdl:FileName>*</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Target>
+      <jsdl:URI>$SUBMISSION_DIRECTORY</jsdl:URI>
+    </jsdl:Target>
+  </jsdl:DataStaging>
+</TemplateApplicationConverter>

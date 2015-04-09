@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationActions xmlns="http://schemas.altair.com/pbs/2009/01/app-actions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:schemaLocation="http://schemas.altair.com/pbs/2009/01/app-actions ../../app-actions.xsd">
+<ApplicationId>GlxSpheres</ApplicationId>
+
+<!-- WARNING: Display Manager(DM) solution is built using these custom actions; further customization might not be supported and might break DM -->
+
+<CustomAction>
+
+     <JobStates>
+          <JobState>RUNNING</JobState>
+     </JobStates>
+
+     <Name>DM_CUSTOM_ACTION</Name>
+     <DisplayName>DM_CUSTOM_ACTION</DisplayName>
+     <Description>Action to support DM apps</Description>
+
+     <ArgumentChoice>
+          <ArgumentStringEnumerated>
+		<Name>DM_CUSTOM_ACTION_TYPE</Name>
+                <Description>Select action</Description>
+                <DisplayName>DM_ACTION</DisplayName>
+                <InputRequired>true</InputRequired>
+		<Option>START_APP</Option>
+		<Option>GET_SESSION</Option>
+		<Option>GET_OTP</Option>
+		<Option>WAIT_ON_SESSION</Option>
+		<Option>STOP_SESSION</Option>
+		<Option>SET_SESSION_EXPIRY</Option>
+	  </ArgumentStringEnumerated>
+     </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>DM_APP_ARGS</Name>
+            <Description>App Args</Description>
+            <DisplayName>DM_APP_ARGS</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>DM_APP_ENVS</Name>
+            <Description>App Envs</Description>
+            <DisplayName>DM_APP_ENVS</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>DM_APP_WDIR</Name>
+            <Description>App Working Dir</Description>
+            <DisplayName>DM_APP_WDIR</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <Executable>
+            <Language>PYTHON</Language>
+            <Name>iJobActions.py</Name>
+    </Executable>
+
+    <ShowOutput>true</ShowOutput>
+ </CustomAction>
+</ApplicationActions>

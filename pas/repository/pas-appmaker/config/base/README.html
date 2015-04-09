@@ -1,0 +1,50 @@
+<h1>pas-appmaker/config/base/README</h1>
+
+<p>A framework for creating powerful application definitions.</p>
+
+<h2>Base</h2>
+
+<pre><code>pas-appmaker/config/base
+</code></pre>
+
+<p>Modifying the Base files directly is not advised. However, in advanced cases where some customization of these files is required to satisfy customer specific needs, use the pas-appmaker Templating files. The easiest way is to copy the Base files you'd like to customize into <code>$PAS_APP_CONFIG/templates/</code> and make your modifications there. pas-appmaker checks for Template files first before eventually looking for Base files.</p>
+
+<h3>Input Files</h3>
+
+<pre><code>pas-appmaker/config/base/app-inp.xml
+pas-appmaker/config/base/app-conv.xml
+pas-appmaker/config/base/input.py
+</code></pre>
+
+<h3>Submit Files</h3>
+
+<pre><code>pas-appmaker/config/base/presubmit.py
+pas-appmaker/config/base/postsubmit.py
+</code></pre>
+
+<h3>Start Files</h3>
+
+<pre><code>pas-appmaker/config/base/start.py
+</code></pre>
+
+<h3>Actions Files</h3>
+
+<pre><code>pas-appmaker/config/base/app-actions.xml    
+pas-appmaker/config/base/actions.py
+</code></pre>
+
+<h3>Exit Files</h3>
+
+<pre><code>pas-appmaker/config/base/exit.py
+</code></pre>
+
+<h3>External Scripts (No Template Support)</h3>
+
+<pre><code>pas-appmaker/config/base/include_parser.py
+pas-appmaker/config/base/qlaunch.sh
+pas-appmaker/config/base/rcheck.pl
+</code></pre>
+
+<h2>Copyright</h2>
+
+<p>(c) Copyright 2013 - 2014 Altair Engineering, Inc. All rights reserved.</p>

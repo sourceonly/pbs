@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput
+
+    xmlns="http://schemas.altair.com/pbs/2007/02/app-def"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+    <ApplicationId>interactiveApp</ApplicationId>
+    <ApplicationName>interactiveApp</ApplicationName>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>JOB_NAME</Name>
+            <Description>The name of the job.</Description>
+            <DisplayName>Job Name</DisplayName>
+            <InputRequired>true</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>APP_NAME</Name>
+            <Description>Interactive application you want to start</Description>
+            <DisplayName>Application Name</DisplayName>
+            <InputRequired>true</InputRequired>
+            <Option>GlxSpheres</Option>
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>APP_GEOMETRY</Name>
+            <Description>Geometry of the interactive application you selected to start</Description>
+            <DisplayName>Application Geometry</DisplayName>
+            <InputRequired>true</InputRequired>
+            <Option default="true">1024x768</Option>
+            <Option>1280x960</Option>
+            <Option>1280x1024</Option>
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentInt>
+            <Name>NCPUS</Name>
+            <Description>The number of CPUs to request.</Description>
+            <DisplayName>nCPU</DisplayName>
+            <InputRequired>true</InputRequired>
+            <Value>1</Value>
+        </ArgumentInt>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentInt>
+            <Name>MEMORY</Name>
+            <Description>Memory (MB)</Description>
+            <DisplayName>Memory</DisplayName>
+            <InputRequired>true</InputRequired>
+            <LowerBound>100</LowerBound>
+            <UpperBound>1000</UpperBound>
+            <Value>256</Value> 		
+        </ArgumentInt>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+	<ArgumentBooleanWithDescription>
+            <Name>GPU</Name>
+            <Description>Is GPU required ?</Description>
+            <DisplayName>GPU(?)</DisplayName>
+            <InputRequired>false</InputRequired>
+            <FeatureEnabled>true</FeatureEnabled>
+	</ArgumentBooleanWithDescription>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>APP_ARG</Name>
+            <Description>Arguments for the application</Description>
+            <DisplayName>Application Args(s)</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>APP_ENV</Name>
+            <Description>Environments for the application that are ; separated</Description>
+            <DisplayName>Application Env(s)</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentDirectoryName>
+            <Name>START_DIR</Name>
+            <Description>Application will start in $PBS_JOBDIR if specified dir doesn't exist</Description>
+            <DisplayName>Start Dir</DisplayName>
+            <InputRequired>false</InputRequired>
+        </ArgumentDirectoryName>
+    </ArgumentChoice>
+
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>WALLTIME</Name>
+            <Description>Walltime of the job</Description>
+            <DisplayName>Walltime</DisplayName>
+            <InputRequired>false</InputRequired>
+	    <Value>08:00:00</Value>
+        </ArgumentString>
+    </ArgumentChoice>
+
+</TemplateApplicationInput>

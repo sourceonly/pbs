@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationConverter xmlns="http://schemas.altair.com/pbs/2007/02/app-conv" xmlns:app-def="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:jsdl="http://schemas.ggf.org/jsdl/2005/11/jsdl" xmlns:jsdl-hpcp="http://schemas.ggf.org/jsdl/2006/07/jsdl-hpcp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.altair.com/pbs/2007/02/app-conv ../../schemas/app-conv.xsd">
+<!--
+(c) Copyright 2010 Altair Engineering, Inc.  All rights reserved.
+
+This code is provided as is without any warranty, express or implied,
+or indemnification of any kind.
+All other terms and conditions are as specified in the Altair PBS EULA.
+-->
+<!-- Manually edited -->
+  <ApplicationId>Fluent-journal</ApplicationId>
+  <ApplicationName>Fluent-journal</ApplicationName>
+  <HPCProfileApplication>
+    <jsdl-hpcp:Executable>/bin/bash</jsdl-hpcp:Executable>    
+    <jsdl-hpcp:Argument>runtime/startvnc.sh</jsdl-hpcp:Argument>
+    <jsdl-hpcp:Environment name="DISPLAY">$DISPLAY</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="JOURNAL">converterIf($JOURNAL?name($JOURNAL))</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="INCLUDEFILES">converterIf($INCLUDEFILES?name($INCLUDEFILES))</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="CORES">$CORES</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="DIMENSION">$DIMENSION</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="PRECISION">$PRECISION</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="INTERACTIVE">converterIf($INTERACTIVE?:-gu -driver null)</jsdl-hpcp:Environment>
+
+    <!-- Policies to environmnet translations -->
+    <jsdl-hpcp:Environment name="FLUENT_SSH">$FLUENT_SSH_COMMAND</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="LM_LICENSE_FILE">$FLUENT_LM_LICENSE_FILE</jsdl-hpcp:Environment>
+    <jsdl-hpcp:Environment name="STARTPY_DEBUG">$STARTPY_DEBUG</jsdl-hpcp:Environment>
+
+  </HPCProfileApplication>
+  <jsdl:Resources>
+    <!--
+         Fuent licensing here
+         Actual PBS resource names are in site-config.xml
+    -->
+    <CustomResource>
+      <Name>fluentall</Name>
+      <Value>1</Value>
+    </CustomResource>
+    <CustomResource>
+      <Name>fluentpar</Name>
+      <Value>( $CORES - 1 )</Value>
+    </CustomResource>
+    <Chunks>$CORES</Chunks>
+    <TotalCPUCount>
+      <Exact>1</Exact>
+    </TotalCPUCount>
+    <CustomResource>
+      <Name>mpiprocs</Name>
+      <Value>1</Value>
+      <NodeLevel>true</NodeLevel>
+    </CustomResource>
+    <Software>Fluent</Software>
+        <TotalPhysicalMemory>
+                        <Exact>1024</Exact>
+                                </TotalPhysicalMemory>
+    <CustomResource>
+      <Name>pas_applications_enabled</Name>
+      <Value>Fluent</Value>
+    </CustomResource>
+  </jsdl:Resources>
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($JOURNAL)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$JOURNAL</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <jsdl:DataStaging>
+    <jsdl:FileName>name($INCLUDEFILES)</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Source>
+      <jsdl:URI>$INCLUDEFILES</jsdl:URI>
+    </jsdl:Source>
+  </jsdl:DataStaging>
+  <jsdl:DataStaging>
+    <jsdl:FileName>*</jsdl:FileName>
+    <jsdl:CreationFlag>overwrite</jsdl:CreationFlag>
+    <jsdl:Target>
+      <jsdl:URI>$SUBMISSION_DIRECTORY</jsdl:URI>
+    </jsdl:Target>
+  </jsdl:DataStaging>
+</TemplateApplicationConverter>

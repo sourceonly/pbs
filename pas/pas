@@ -1,0 +1,141 @@
+#!/bin/sh
+#
+#    PAS server init script
+#
+#       Recognized arguments:
+#           start   - start PAS server
+#           stop    - terminate PAS server
+#           restart - terminate and start PAS server
+#           status  - report PAS server pid
+#
+#
+# chkconfig: 345 97 97
+# description: Altair PAS server provides web serices 
+# for Application job submission, monitoring and control
+# and for Applications administration
+#
+# SuSe initialization
+#
+#  /etc/init.d/pas
+#
+### BEGIN INIT INFO
+# Provides:       pas
+# Required-Start: $network $local_fs $remote_fs $named $pbs
+# Required-Stop:
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 4 6
+# Description:    Altair PAS server
+### END INIT INFO
+#
+#  Copyright (C) 2003-2010 Altair Engineering, Inc. All rights reserved.
+#  
+#  ALTAIR ENGINEERING INC. Proprietary and Confidential. Contains Trade Secret Information.
+#  Not for use or disclosure outside ALTAIR and its licensed clients. Information contained 
+#  herein shall not be decompiled, disassembled, duplicated or disclosed in whole or in part
+#  for any purpose. Usage of the software is only as explicitly permitted in the end user 
+#  software license agreement.
+#  
+#  Copyright notice does not imply publication. 
+#
+
+if [ $# -eq 1 ] && [ $1 = "--version" ]; then
+   echo pas_version=PAS_10.2
+   exit 0
+fi
+
+conf=${PAS_CONF_FILE:-/etc/pas.conf}
+
+if [ -f "${conf}" ] ; then
+. "${conf}"
+
+else
+  echo "***"
+  echo "*** Cannot find PAS configuration file: ${conf}"
+  echo "***"
+  exit 1
+fi
+
+#determine PAS_HOME and PAS_EXEC
+PAS_HOME=${PAS_HOME:-/var/spool/pas}
+if [ ! -d $PAS_HOME ] ; then
+  echo "fatal: $PAS_HOME directory not found, quitting"
+  exit 1
+fi
+
+PAS_EXEC=${PAS_EXEC:-/usr/pas}
+if [ ! -d "$PAS_EXEC" ] ; then
+  echo "fatal: $PAS_EXEC not found, quitting"
+  exit 1
+fi
+
+# These variables typically should not change - do not touch them 
+# unless you know exactly what you are doing
+pas_start_script=${PAS_EXEC}'/scripts/pas-server-start.sh' 
+pas_stop_script=${PAS_EXEC}'/scripts/pas-server-stop.sh' 
+pas_pid_script=${PAS_EXEC}'/scripts/pas-pid.sh pass'
+
+#start pas
+start_pas()
+{
+  echo "Starting PAS server"
+  pas_pid=`${pas_pid_script}`  
+  if [ "${pas_pid}" -gt 0 ] ; then
+    echo "PAS server already running, pid: ${pas_pid}"
+  else
+    if [ -x ${pas_start_script} ] ; then
+      	${pas_start_script} 
+      sleep 3
+      pas_pid=`${pas_pid_script}`
+      if [ "${pas_pid}" -gt 0 ] ; then
+        echo "PAS server started, pid: ${pas_pid}"
+      else
+        echo "PAS server startup failed. Please check your installation. "
+      fi
+    else
+      echo "PAS server startup failed: no startup script: ${pas_start_script}"
+    fi
+  fi
+}
+
+#stop pas
+stop_pas()
+{
+  echo "Stopping PAS server"
+  pas_pid=`${pas_pid_script}`  
+  if [ "${pas_pid}" -gt 0 ] ; then
+    if [ -x ${pas_stop_script} ] ; then
+      ${pas_stop_script} 
+    else
+      echo "PAS stop failed: no stop script: ${pas_stop_script}"
+    fi
+    pas_pid_1=`${pas_pid_script}`
+    if [ "${pas_pid_1}" -gt 0 ] ; then
+      echo "PAS server stopping failed. PAS server still running, pid: ${pas_pid_1}"
+    else
+      echo "PAS server stopped, was pid: ${pas_pid}"
+    fi
+  else
+    echo "PAS server is not running." 
+  fi 
+}
+
+#get status of PAS server
+status_pas() 
+{
+  pas_pid=`${pas_pid_script}`  
+  if [ "${pas_pid}" -gt 0 ] ; then
+    echo "PAS server is running with pid: ${pas_pid}"
+  else
+    echo "PAS server is not running."
+  fi
+}
+
+#main
+case "$1" in
+  status) status_pas ;;
+  start) start_pas ;;
+  stop) stop_pas ;;
+  restart) echo "Restarting PAS server" ; stop_pas ; sleep 10; start_pas ;;
+  *) echo "Usage: `basename $0` {start|stop|restart|status}" ; exit 1 ;;
+esac
+

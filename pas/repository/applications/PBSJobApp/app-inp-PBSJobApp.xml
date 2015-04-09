@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput
+  
+  xmlns="http://schemas.altair.com/pbs/2007/02/app-def"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  
+  <ApplicationId>PBSJobApp</ApplicationId>
+  <ApplicationName>PBSJobApp</ApplicationName>
+
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>JOB_NAME</Name>
+      <Description>The name of the job.</Description>
+      <DisplayName>Job Name</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentString>
+  </ArgumentChoice>
+
+
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>JOB_ACCOUNT</Name>
+      <Description>The name of the Complete job.</Description>
+      <DisplayName>Job Account</DisplayName>
+      <InputRequired>false</InputRequired>
+    </ArgumentString>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentBooleanChoice>
+      <Name>MULTIPLEX</Name>
+      <Description>Multiple subjob submission</Description>
+      <DisplayName>Multiple Jobs</DisplayName>
+      <InputRequired>false</InputRequired>
+      <FeatureEnabled>false</FeatureEnabled>
+    </ArgumentBooleanChoice>
+  </ArgumentChoice>
+
+
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>NCPUS</Name>
+      <Description>The total number of processors.</Description>
+      <DisplayName>Number of Processors</DisplayName>
+      <InputRequired>true</InputRequired>
+      <LowerBound>1</LowerBound>
+      <Value>1</Value>
+    </ArgumentInt>
+  </ArgumentChoice>
+
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>ZIPFILE</Name>
+      <Description>All the ZIPPED input files</Description>
+      <DisplayName>Input ZIP</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>INPUT_DIRECTORY</Name>
+      <Description>INPUT</Description>
+      <DisplayName>INPUT</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+
+
+  <!-- For PBS Desktop ONLY! -->
+
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>SUBMISSION_DIRECTORY</Name>
+      <Description>Result files will be placed here by PBS Desktop.</Description>
+      <DisplayName>Output Directory</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+
+</TemplateApplicationInput>

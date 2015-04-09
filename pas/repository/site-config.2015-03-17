@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SiteConfiguration xmlns="http://schemas.altair.com/pbs/2007/01/site-config" xmlns:site-config="http://schemas.altair.com/pbs/2007/01/site-config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.altair.com/pbs/2007/01/site-config ../schemas/site-config.xsd">
+  <Applications>
+    <Application id="PBSJobApp">
+      <ApplicationVersions/>
+    </Application>
+    <Application id="Fluent">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>13.0</Option>
+          <Executable>/data/apps/ansys_inc/v130/fluent/bin/fluent</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="Fluent-journal">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>14.5.0</Option>
+          <Executable>/hpfs01/cae/ansys_inc/v145/fluent/bin/fluent</Executable>
+        </ApplicationVersion>
+        <ApplicationVersion>
+          <Option>12.1.0</Option>
+          <Executable>/hpfs01/cae/121_ansys/ansys_inc/v121/fluent/bin/fluent</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="Radioss12">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>12.0</Option>
+          <Executable>/data/apps/hw12.0/altair/hwsolvers/radioss/bin/linux64/s_12.0_linux64</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="Optistruct">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>11.0</Option>
+          <Executable>/data/apps/hyperworks/altair/scripts/optistruct</Executable>
+        </ApplicationVersion>
+        <ApplicationVersion>
+          <Option>12.0</Option>
+          <Executable>/data/apps/hw12.0/altair/scripts/optistruct</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="Hyperworks">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>12.0</Option>
+          <Executable>/data/apps/hw12/altair/</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="Windesk">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>12.0</Option>
+          <Executable>/data/apps/hw12/altair/</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="Radioss11">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>11.0</Option>
+          <Executable>/data/apps/hyperworks/altair/hwsolvers/bin/linux64/s_11.0_linux64</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+    <Application id="interactiveApp">
+      <ApplicationVersions/>
+    </Application>
+    <Application id="GlxSpheres">
+      <ApplicationVersions>
+        <ApplicationVersion>
+          <Option>2.3.3</Option>
+          <Executable>/opt/VirtualGL/bin/glxspheres64</Executable>
+        </ApplicationVersion>
+      </ApplicationVersions>
+    </Application>
+  </Applications>
+  <JobProjects id="BILLING_ACCOUNT"/>
+  <Policies>
+    <Policy>
+      <Option>PRESUBMIT_DEBUG</Option>
+      <Value>1</Value>
+    </Policy>
+    <Policy>
+      <Option>PRESUBMIT_DEBUG_FILE</Option>
+      <Value>/tmp/presubmit.debug</Value>
+    </Policy>
+    <Policy>
+      <Option>STARTPY_DEBUG</Option>
+      <Value>1</Value>
+    </Policy>
+    <Policy>
+      <Option>ALTAIR_LICENSE_PATH</Option>
+      <Value>6200@192.168.40.67</Value>
+    </Policy>
+    <Policy>
+      <Option>ABAQUS_TOKENS_RESOURCE</Option>
+      <Value>abaqus</Value>
+    </Policy>
+    <Policy>
+      <Option>NASTRAN_ESTIMATE_COMMAND</Option>
+      <Value>/soft/mdnastran/2010.1.3/bin/md20101 estimate</Value>
+    </Policy>
+    <Policy>
+      <Option>FLUENT_LM_LICENSE_FILE</Option>
+      <Value>7421@sun440</Value>
+    </Policy>
+    <Policy>
+      <Option>Motion_RESOURCE</Option>
+      <Value>motion</Value>
+    </Policy>
+    <Policy>
+      <Option>FLUENT_SSH_COMMAND</Option>
+      <Value>/opt/pbs/default/bin/pbs_tmrsh</Value>
+    </Policy>
+    <Policy>
+      <Option>RADIOSS_HP_MPI_ROOT</Option>
+      <Value>/data/apps/plmpi</Value>
+    </Policy>
+  </Policies>
+</SiteConfiguration>

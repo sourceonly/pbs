@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput xmlns="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:schemaLocation="http://schemas.altair.com/pbs/2007/02/app-def ../../schemas/app-def.xsd">
+<!--
+(c) Copyright 2010 Altair Engineering, Inc.  All rights reserved.
+
+This code is provided as is without any warranty, express or implied,
+or indemnification of any kind.
+All other terms and conditions are as specified in the Altair PBS EULA.
+-->
+<!-- Manually edited -->
+  <ApplicationId>Fluent-journal</ApplicationId>
+  <ApplicationName>Fluent-journal</ApplicationName>
+  <ApplicationExtension>.cas</ApplicationExtension>
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>VERSION</Name>
+      <Description>Version of application to use</Description>
+      <DisplayName>Version</DisplayName>
+      <InputRequired>true</InputRequired>
+      <xi:include href="site-config.xml" xpointer="xpath1(//Application[@id='Fluent-journal']/ApplicationVersions//Option)" />
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentString>
+      <Name>JOB_NAME</Name>
+      <Description>Name of the job</Description>
+      <DisplayName>Job Name</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentString>
+  </ArgumentChoice>
+    <ArgumentChoice>
+  	<ArgumentStringEnumerated> 
+  		<Name>PROJECT</Name>
+  		<DisplayName> PROJECT: </DisplayName> 
+  		<InputRequired>true</InputRequired>
+<Option></Option><Option>replacement_options</Option><Value></Value>
+  	</ArgumentStringEnumerated>
+  </ArgumentChoice>	 
+  <ArgumentChoice>
+    <ArgumentBooleanWithDescription>
+       <Name>CONNECT_ENABLED</Name>
+       <Description>CONNECT_ENABLED</Description>
+       <InputRequired>true</InputRequired>
+       <DefaultValue>true</DefaultValue>
+    </ArgumentBooleanWithDescription>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentInt>
+      <Name>CORES</Name>
+      <Description>Number of CPUs requested</Description>
+      <DisplayName>No. of CPUs</DisplayName>
+      <InputRequired>true</InputRequired>
+      <LowerBound>1</LowerBound>
+      <UpperBound>64</UpperBound>
+      <Value>1</Value>
+    </ArgumentInt>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentFileName>
+      <Name>JOURNAL</Name>
+      <Description>Fluent journal file</Description>
+      <DisplayName>Journal file</DisplayName>
+      <InputRequired>false</InputRequired>
+    </ArgumentFileName>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentFileNameMulti>
+      <Name>INCLUDEFILES</Name>
+      <Description/>
+      <DisplayName>Include files</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentFileNameMulti>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>DIMENSION</Name>
+      <Description>Number of dimensions</Description>
+      <DisplayName>Dimension</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default="true">3d</Option>
+      <Option>2d</Option>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentStringEnumerated>
+      <Name>PRECISION</Name>
+      <Description>Numerical precision</Description>
+      <DisplayName>Precision</DisplayName>
+      <InputRequired>true</InputRequired>
+      <Option default="true">Single</Option>
+      <Option>Double</Option>
+    </ArgumentStringEnumerated>
+  </ArgumentChoice>
+  <ArgumentChoice>
+    <ArgumentDirectoryName>
+      <Name>SUBMISSION_DIRECTORY</Name>
+      <Description>Result files will be placed here</Description>
+      <DisplayName>Output directory</DisplayName>
+      <InputRequired>true</InputRequired>
+    </ArgumentDirectoryName>
+  </ArgumentChoice>
+</TemplateApplicationInput>

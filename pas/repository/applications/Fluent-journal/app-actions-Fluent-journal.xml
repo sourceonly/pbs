@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationActions xmlns="http://schemas.altair.com/pbs/2009/01/app-actions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:schemaLocation="http://schemas.altair.com/pbs/2009/01/app-actions ../../app-actions.xsd">
+<ApplicationId>Fluent</ApplicationId>
+<CustomAction>
+      <JobStates>
+           <JobState>RUNNING</JobState>
+           <JobState>QUEUED</JobState>
+      </JobStates>
+      <Name>Fluent_lic</Name>
+      <DisplayName>Fluent_lic</DisplayName>
+      <Description>Fluent_lic</Description>
+      <ArgumentChoice>
+           <ArgumentStringEnumerated>
+                <Name>Fluent_lic</Name>
+                <Description>Fluent_lic</Description>
+                <DisplayName>Type</DisplayName>
+                <InputRequired>true</InputRequired>
+		<Option default='true'>Show_license</Option>
+            </ArgumentStringEnumerated>
+      </ArgumentChoice>
+      <Executable>
+            <Language>PYTHON</Language>
+            <Name>fluent.py</Name>
+      </Executable>
+      <ShowOutput>true</ShowOutput>
+ </CustomAction>
+</ApplicationActions>

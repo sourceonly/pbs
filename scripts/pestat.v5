@@ -1,0 +1,221 @@
+#!/bin/sh
+
+# Name: pestat
+# Usage: pestat [-f]
+# Torque resource manager utility script:
+# Print a 1-line summary of jobs on each node.
+# The printout may be customized as needed.
+
+# Author: Ole.H.Nielsen@fysik.dtu.dk
+# Version: 2.0
+# Date: 27 September 2007
+
+# Command arguments
+if test $# -ge 1
+then
+	# Argument -f: Print only those nodes that are flagged
+	if test $# -eq 1 -a $1 = "-f"
+	then
+		echo Listing only nodes that are flagged by \*
+		listflagged=1
+	else
+		echo Usage: $0 '[-f]'
+		exit 1
+	fi
+else
+	listflagged=0
+fi
+. /etc/pbs.conf
+# Locations of commands used
+PBSNODES=${PBS_EXEC}/bin/pbsnodes
+QSTAT=${PBS_EXEC}/bin/qstat
+AWK=/bin/awk
+
+# Heading for printout showing:
+# node:		Node hostname
+# state:	Torque state
+# load:		CPU load average
+# pmem:		Physical memory
+# ncpu:		Number of CPUs
+# mem:		Physical+virtual memory
+# resi:		Resident (used) memory
+# usrs:		Number of sessions / Number of users
+# jobs:		Number of jobs
+# jobids/users:	Jobids and corresponding usernames of Torque jobs on this node
+echo "node    nodetype	state     mem  usemem   ncpus tasks  jobids/users"
+
+#
+# Show the Torque node status and parse the results
+#
+$PBSNODES -a | $AWK -v listflagged=$listflagged -v QSTAT=$QSTAT '
+BEGIN {
+	#
+	# First get the list of jobids versus usernames from qstat
+	#
+	QSTAT = QSTAT " -r"			# Append -r flag (running jobs) to qstat.
+	while ((QSTAT | getline) > 0) {		# Parse lines from qstat -r
+		if (++line>5) {			# Skip first 5 header lines
+			split($1,b,".")		# Jobid is b[1]
+			username[b[1]] = $2	# Username of this jobid
+		}
+	}
+	close(QSTAT)
+}
+#
+# Parse the output of pbsnodes
+#
+NF==1 {	node=$1				# 1st line is nodename
+	nodename[node] = node		# Node name
+	getline				# Get the next input line
+	numjobs[node] = 0               # Torque jobs on the node
+	numtasks[node] = 0              # Number of tasks started by Torque on the node
+	listnode=0			# Set to > 0 if this node gets flagged
+	while (NF >= 3) {		# Read a number of non-blank lines
+		if ($1 == "state") {
+			if ($3 == "job-exclusive")			state[node] = "excl"
+			else if ($3 == "job-exclusive,busy")		state[node] = "busy"
+			else if ($3 == "job-busy")			state[node] = "job-busy"
+			else if ($3 == "job-busy,busy")			state[node] = "busy"
+			else if ($3 == "busy")				state[node] = "busy"
+			else if ($3 == "free")				state[node] = "free"
+			else if ($3 == "offline")			state[node] = "offl"
+			else if ($3 == "offline,job-exclusive")		state[node] = "offl"
+			else if ($3 == "offline,job-exclusive,busy")	state[node] = "offl"
+			else if ($3 == "down")				state[node] = "down"
+			else if ($3 == "state-unknown,down node down: communication closed")				state[node] = "down*"
+			else if ($3 == "state-unknown,down")				state[node] = "down*"
+			else if ($3 == "down,offline")			state[node] = "down*"
+			else if ($3 == "down,job-exclusive")		state[node] = "down*"
+			else if ($3 == "down,offline,job-exclusive")	state[node] = "down*"
+			else if ($3 == "down,offline,busy")		state[node] = "down*"
+			else if ($3 == "down,offline,job-exclusive,busy")	state[node] = "down*"
+			else if ($3 == "UNKN")				state[node] = "UNKN"
+		}
+		else if ($1 == "pcpus")		ncpus[node] = $3
+		else if ($1 == "resources_available.mem")  totmem[node] = $3
+		else if ($1 == "resources_assigned.mem")  totusemem[node] = $3
+		else if ($1 == "resources_available.nodetype")	nodetype[node] = $3
+		else if ($1 == "jobs") {
+			numtasks[node] = NF - 2
+                        j=1
+                        for(i=3;i<=NF;i++){
+                        	aa=substr($i,0,index($i,".")-1)
+                                flag=0
+                                for(k=1;k<j;k++) {
+                                	if (arr[k]==aa) {
+                                        	flag=1
+                                                break
+                                        }
+                                }
+                                if (flag==0){
+                                        arr[j]=aa
+                                        j++
+                                }
+                        }
+			flag=0
+			for(k=1;k<j;k++){
+				if(flag==0){
+					jobidlist[node]=arr[k]"/"username[arr[k]]
+					flag=1
+				}else
+					jobidlist[node]=jobidlist[node]","arr[k]"/"username[arr[k]]
+			}
+                }
+
+#		else if ($1 == "status") {
+#			# Get the node status subfields
+#			split (substr($0,15), a, ",")	# Remove leading "status =", split subfields separated by ","
+#			for (field in a) {		# Process individual status subfields
+#				split(a[field],b,"=")	# Split var=value fields
+#				if (b[1]=="arch")		arch[node]=b[2]
+#				else if (b[1]=="opsys")		opsys[node]=b[2]
+#				else if (b[1]=="sessions")	sessions[node]=b[2]
+#				else if (b[1]=="nsessions")	nsessions[node]=int(b[2])
+#				else if (b[1]=="nusers")	nusers[node]=b[2]
+#				else if (b[1]=="idletime")	idletime[node]=b[2]
+#				else if (b[1]=="totmem")	totmem[node]=b[2]
+#				else if (b[1]=="availmem")	availmem[node]=b[2]
+#				else if (b[1]=="physmem")	physmem[node]=b[2]
+#				else if (b[1]=="ncpus")		ncpus[node]=b[2]
+#				else if (b[1]=="loadave")	loadave[node]=b[2]
+#				else if (b[1]=="netload")	netload[node]=b[2]
+#				else if (b[1]=="size")		size[node]=b[2]
+#				else if (b[1]=="jobs") {
+#					# Get the list of jobids/users for this node
+#					if (b[2] == "? 0") b[2] = ""	# Fix for a bug in pbsnodes ?
+#					numjobs[node]=split(b[2],c)
+#					for (i=1; i <= numjobs[node]; i++) {
+#						split(c[i], d, ".")
+#						# Get jobid and username
+#						jobid = d[1]
+#						user = username[jobid]
+#						# Case where the node pbs_mom has a (dead job) jobid unknown to pbs_server:
+#						if (length(user) == 0) {	# Flag non-existent username
+#							user="NONE*"
+#							listnode++
+#						}
+#						# Append jobid and username to the job list
+#						jobidlist[node] = jobidlist[node] " " jobid " " user
+#					}
+#				} else if (b[1]=="rectime")	rectime[node]=b[2]
+#			}
+#		}
+		getline			# Get the next input line
+	}
+
+	# Print out values that we are interested in.  Flag unexpected values with a "*".
+
+	# Flag nodes with status down, offline or unknown
+	if (state[node] == "busy" || state[node] == "down" || state[node] == "offl" || state[node] == "UNKN") {
+		stateflag="*"
+		listnode++
+	} else
+		stateflag=" "
+
+	# Flag unexpected CPU load average
+#	loaddiff = loadave[node] - numtasks[node]
+#	if (loaddiff > 0.5 || loaddiff < -0.5) {
+#		loadflag="*"
+#		listnode++
+#	} else
+#		loadflag=" "
+
+	# Resident memory
+#	resi = (totmem[node]-availmem[node])/1024
+#	if (resi > 50 && resi > physmem[node]/1024 - 50) {	# High memory usage
+#		resiflag="*"
+#		listnode++
+#	} else
+#		resiflag=" "
+
+	# Flag unexpected number of processes or users
+#	if (nsessions[node] > 2*ncpus[node] + 1) {	# More than 2 sessions per job
+#		sessflag="*"
+#		listnode++
+#	} else if (nusers[node] > ncpus[node]) {	# More users than nCPUs is bad
+#		sessflag="*"
+#		listnode++
+#	} else
+#		sessflag=" "
+
+	# Flag unexpected number of jobs
+#	if (numjobs[node] > numtasks[node]) {		# Should be at least 1 task per job
+#		jobflag="*"
+#		listnode++
+#	} else
+#		jobflag=" "
+
+	# CONFIGURE: Comment out the line below
+	# Omit down nodes from the flagged list because we do not bother to see them
+	# (Use "pbsnodes -l" to list down nodes).
+	if (state[node] == "down") listnode=0
+
+#	if (!listflagged || listnode > 0)
+#		printf ("  %s  %s%1s %4.2f%1s %6d %3d %6d %6d%1s %1d/%1d%1s %3d%1s  %s\n",
+#			node, state[node], stateflag, loadave[node], loadflag,
+#			physmem[node]/1024, ncpus[node], totmem[node]/1024, resi, resiflag,
+#			nsessions[node], nusers[node], sessflag, numtasks[node], jobflag, jobidlist[node])
+		printf ("%-8s%5s  %10s %6s %6s  %3s   %3s    %-20s\n",
+			node";", nodetype[node]";",state[node]";", totmem[node]/1024";", totusemem[node]/1024";", ncpus[node]";", numtasks[node]";", jobidlist[node])
+}'
+

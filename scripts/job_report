@@ -1,0 +1,25 @@
+#!/bin/sh
+
+
+###################################
+#Author by Wangyihua@altair.com.cn
+###################################
+. /etc/pbs.conf
+export PATH=$PBS_EXEC/bin:$PATH
+day=`date +%Y-%m-%d`
+today=`date -d "0 days ago" +%Y%m%d`
+today_rjobs=`qselect -x -ts.gt.${today}0000 -ts.lt.${today}2359|wc -l`
+today_qjobs=`qselect -x -tq.gt.${today}0000 -tq.lt.${today}2359|wc -l`
+printf '%-12s%8s %12s %12s\n' date runjobs queuejobs
+printf '%-12s%8s %12s %12s\n' $day $today_rjobs $today_qjobs
+for i in `seq 1 6`;
+do
+   day_num=day$i
+   day_jobnum=day${i}_jobs
+   day_num=`date -d "$i days ago" +%Y%m%d`
+   day=`date -d "$i days ago" +%Y-%m-%d`
+   day_rjobs=`qselect -x -ts.gt.${day_num}0000 -ts.lt.${day_num}2359|wc -l`
+   day_qjobs=`qselect -x -tq.gt.${day_num}0000 -tq.lt.${day_num}2359|wc -l`
+   printf '%-12s%8s %12s %12s\n' $day $day_rjobs $day_qjobs
+done
+

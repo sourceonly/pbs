@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# author: Wang Yihua [wangyihua@altair.com.cn]
+# date:09:20 2013-04-24
+# version:1.0
+# purpose: get each user app job info
+
+
+job_detail=/tmp/job_detail_$$
+job_info=/tmp/job_info_$$
+pestat_info=/tmp/pestat_info_$$
+. /etc/pbs.conf
+export PATH=$PBS_EXEC/bin:$PATH
+
+. /etc/pbsworks.conf
+export PATH=$PATH:$SERVER_HOME/scripts/shell
+
+get_appname(){
+
+cat $job_detail|grep Resource_List.software|awk '{print $3}'|sort|uniq
+
+}
+
+qstat -f >$job_detail
+pestat >$pestat_info
+app_list=`get_appname`
+printf '%-16s%8s %12s %12s %12s %12s %12s %12s %12s\n' appname totaljob queuejob runjob request-cpu queue-cpu use-cpu req_percent
+for app in $app_list;
+  do 
+   app=$app
+   qstat -aw `qselect -lsoftware.eq.${app}`|grep ^[1-9] >$job_info
+   tjob=`cat $job_info|wc -l`
+   tcpu=`cat $pestat_info|awk '{cpus+=$5}END{print cpus}'`
+   queuejob=`cat $job_info|awk '{if( $10 == "Q" ) {tjob+=1}}END{print tjob}'`
+   if test -z $queuejob; then queuejob="0"; fi
+   runjob=`cat $job_info|awk '{if( $10 == "R" || $10 == "E" ) {tjob+=1}}END{print tjob}'`
+   if test -z $runjob; then runjob="0"; fi
+   othercpu=`cat $job_info|awk '{if( $10 == "S" && $10 == "H" ) {tcpu+=$7}}END{print tcpu}'`
+   if test -z $othercpu; then othercpu="0"; fi
+   usecpu=`cat $job_info|awk '{if( $10 == "R" ) {tcpu+=$7}}END{print tcpu}'`
+   if test -z $usecpu; then usecpu="0"; fi
+   queuecpu=`cat $job_info|awk '{if( $10 == "Q" ) {tcpu+=$7}}END{print tcpu}'`
+   if test -z $queuecpu; then queuecpu="0"; fi
+   reqcpu=`expr $usecpu + $queuecpu + $othercpu`
+   if [ "$reqcpu" = 0 ]; then
+        req_percent="0.00%"
+   else
+        req_percent=`gawk -v x=$reqcpu -v y=$tcpu 'BEGIN{printf "%.2f%%",x*100/y}'`
+   fi
+   printf '%-16s;%8s; %12s; %12s; %12s; %12s; %12s; %12s; \n' $app $tjob $queuejob $runjob $reqcpu $queuecpu $usecpu $req_percent
+done
+
+
+rm $job_detail 2>/dev/null
+rm $job_info 2>/dev/null
+rm $pestat_info 2>/dev/null

@@ -1,0 +1,153 @@
+#!/usr/bin/perl
+my %jobstat = ();
+#use date::calc;
+my $timenow=time();
+
+$ENV{'PATH'}="$ENV{'PATH'}:/opt/pbs/default/bin";
+
+
+#print $timenow
+#print "$timenow\n";
+if (open(QSTAT , "qstat -f | tr '\n' '!' | sed 's/\!\t//g' | tr '!' '\n' |")) {
+    my $currentjob;
+    while (<QSTAT>) {
+	if ($_=~ /Job Id:\s+(\d+).*/) {
+	     # print $1 ;
+	     $currentjob=$1;	
+	     $jobstat{$currentjob}=$1;
+	}
+	if ($_=~/.*Job_Name = ([A-Za-z0-9\-]*).*/) {
+	     $jobstat{$currentjob}{name}=$1;
+		# print $1
+	} 	
+	if ($_=~/.*Job_Owner = (.*)@.*/) {
+	    $jobstat{$currentjob}{user}=$1;
+#		print $1
+		#	print $1
+	}		
+	if ($_=~/.*software = ([A-za-z0-9]*).*/) {
+		$jobstat{$currentjob}{soft}=$1
+		#	print $1
+	}
+	if ($_=~/.*exec_host = (.*)$/) {
+		my %execHosts = ();
+		my $host;
+		my $cpus;
+		for $host (split /\+/, $1) {
+			if ($host =~ /\*/) {
+				if ($host =~ /(\S*)\/(\d)*\*(\d)*/) {
+					$host=$1;
+					$cpus=$3;
+					$cpus + 0;
+				}
+			} else {
+				if ($host = ~/(\S*)\/(\d)*$/) {
+					$host=$1;
+					$cpus=1;
+				}
+			}
+			if ($exec_Hosts{$host}) {
+				$execHosts{$host} = $execHosts{$host} + $cpus + 0;
+			} else {
+				$execHosts{$host} = 1;
+			}	
+	#		print "$cpus\n";
+	#		print "$exceHosts{$host}\n";
+		}
+		my $nhosts=0;
+		my $ncpus=0;
+		foreach my $i (keys(%execHosts)) {
+			$nhosts=$nhosts+1;
+			$ncpus=$execHosts{$i} + $ncpus;
+		}
+		$jobstat{$currentjob}{nhosts}=$nhosts;
+		#$jobstat{$currentjob}{ncpus}=$ncpus;
+		#print $nhosts
+	    
+	}
+	if ($_=~/ Resource_List.ncpus = (.*)$/) {
+		$jobstat{$currentjob}{ncpus}=$1;
+		#print "$1\n";
+	}
+	if ($_=~/.*job_state = (.*)$/) {
+		$jobstat{$currentjob}{qstat}=$1;
+	}	
+
+	if ($_=~/.*comment = (.*)/) {
+		$jobstat{$currentjob}{qreason}=$1;
+	}
+	if ($_=~/.*qtime = (.*)/) {
+		my $time=$1;
+		my @date=split(" ",$time);
+		my @time=split(":",$date[3]);
+		my $month;
+		my $year;
+		my $day;
+		my $hour;
+		my $minute;
+		my $second;
+		if ($date[1]=~/Jan/) {
+			$month=1;
+		}
+		if ($date[1]=~/Feb/) {
+			$month=2;
+		} 
+		if ($date[1]=~/Mar/) {
+			$month=3;
+		} 
+		if ($date[1]=~/Apr/) {
+			$month=4;
+		} 
+		if ($date[1]=~/May/) {
+			$month=5;
+		} 
+		if ($date[1]=~/Jun/) {
+			$month=6;
+		} 
+		if ($date[1]=~/Jul/) {
+			$month=7;
+		} 
+		if ($date[1]=~/Aug/) {
+			$month=8;
+		} 
+		if ($date[1]=~/Sep/) {
+			$month=9;
+		} 
+		if ($date[1]=~/Oct/) {
+			$month=10;
+		} 
+		if ($date[1]=~/Nov/) {
+			$month=11;
+		} 
+		if ($date[1]=~/Dec/) {
+			$month=12;
+		} 
+		#$jobstat{$currentjob}{date}="$date[4]-$month-$date[2]";
+		$year=int $date[4];
+		$month=int $month;
+		$day=int $date[2];
+		$hour=int $time[0];
+		$minute=int $time[1];
+		$second=int $time[2];
+		my $string;
+		use Time::Local;
+		$string = int timelocal( $second,$minute,$hour,$day,$month-1,$year);
+		#print "$string\n";
+		#print "$timenow\n";
+		$jobstat{$currentjob}{qhour}=-($string - $timenow)/3600;
+		#print "$jobstat{$currentjob}{qhour}\n";
+	}
+    }
+    
+	close(QSTAT) 
+}
+my $c=";";
+#print("Job_Num;Job_Name;User;SoftWare;Node_Num;Core_Num;Status;Date_Time\n");
+print("Job_ID;Job_Name;Job_Owner;Software;Queue_Reason;Queue_time\n");
+my $index=0;
+foreach my $jobid (sort (keys (%jobstat))) {
+	if ($jobstat{$jobid}{qstat} =~ /Q/ ) {
+	$index=$index+1;
+	printf "%d$c%s$c%s$c%s$c%s$c%1.2f\n", $jobid, $jobstat{$jobid}{name}, $jobstat{$jobid}{user}, $jobstat{$jobid}{soft}, $jobstat{$jobid}{qreason},$jobstat{$jobid}{qhour}
+	}
+}

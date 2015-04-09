@@ -1,0 +1,5 @@
+#!/bin/sh
+. /etc/pbs.conf
+export PATH=${PBS_EXEC}/bin:$PATH
+qdel -W force $1
+echo "being stop jobs_num is "  $1

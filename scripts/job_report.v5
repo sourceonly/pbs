@@ -1,0 +1,4 @@
+#!/bin/bash
+dir=`dirname $0`
+export PATH=$PATH:$dir
+job_report | sed "s/[ ]\+/;/g"

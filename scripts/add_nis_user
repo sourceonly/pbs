@@ -1,0 +1,15 @@
+#!/bin/sh
+username=$1
+quser=`id -nu $username 2>/dev/null`;
+dir=`dirname $(grep pbsadmin /etc/passwd|awk -F: '{print $6}')`
+if [ "${quser}" = $username ]
+then
+echo "$2"| passwd --stdin $username
+cd /var/yp/&&make
+exit 0
+fi
+useradd ${username} -d ${dir}/${username}
+echo "$2"| passwd --stdin $username
+cd /var/yp/&&make
+#rocks sync users &>/dev/null
+exit 0

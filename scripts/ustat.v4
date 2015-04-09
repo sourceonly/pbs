@@ -1,0 +1,59 @@
+#!/bin/sh
+
+###################################
+#Author by Wangyihua@altair.com.cn
+###################################
+. /etc/pbsworks.conf
+export PATH=$SERVER_HOME/scripts/shell:$PATH
+
+dir=`dirname $0`
+export PATH=$PATH:$dir
+
+
+info_file=/tmp/qstat_$$
+pestat_info=/tmp/pestat_info_$$
+
+. /etc/pbs.conf
+export PATH=$PBS_EXEC/bin:$PATH
+
+
+get_username(){
+	cat $info_file|awk '{print $2}'|sort|uniq
+}
+
+
+qstat -aw |grep ^[1-9] >$info_file
+user_list=`get_username`
+pestat > $pestat_info
+tcpu=`cat $pestat_info|awk '{cpus+=$5}END{print cpus}'`
+
+printf '%-16s%8s %12s %12s %12s %12s %12s %12s %12s %12s\n' user";"totaljob";"runjob";"queuejob";"request-cpu";"queue-cpu";"used-cpu";"req_percent
+
+for user in $user_list;
+  do 
+   user=$user
+   tjob=`cat $info_file|grep ${user}" "|wc -l`
+   runjob=`cat $info_file|grep ${user}" "|awk '{if( $10 == "R" || $10 == "E" ) {tjob+=1}}END{print tjob}'`
+   if test -z $runjob; then runjob="0"; fi
+   queuejob=`cat $info_file|grep ${user}" "|awk '{if( $10 == "Q" ) {tjob+=1}}END{print tjob}'`
+   if test -z $queuejob; then queuejob="0"; fi
+   othercpu=`cat $info_file|grep ${user}" "|awk '{if( $10 == "S" && $10 == "H" ) {tcpu+=$7}}END{print tcpu}'`
+   if test -z $othercpu; then othercpu="0"; fi
+   usecpu=`cat $info_file|grep ${user}" "|awk '{if( $10 == "R" || $10 == "E" ) {tcpu+=$7}}END{print tcpu}'`
+   if test -z $usecpu; then usecpu="0"; fi
+   queuecpu=`cat $info_file|grep ${user}" "|awk '{if( $10 == "Q" ) {tcpu+=$7}}END{print tcpu}'`
+   if test -z $queuecpu; then queuecpu="0"; fi
+   reqcpu=`expr $usecpu + $queuecpu + $othercpu`
+   if [ "$reqcpu" = 0 ]; then
+	req_percent="0.00%"
+   else
+	req_percent=`gawk -v x=$reqcpu -v y=$tcpu 'BEGIN{printf "%.2f%%",x*100/y}'`
+   fi
+   printf '%-16s%8s %12s %12s %12s %12s %12s %12s %12s %12s\n' $user";" $tjob";" $runjob";"$queuejob";" $reqcpu";" $queuecpu";" $usecpu";" $req_percent
+
+done
+
+
+rm $info_file
+rm $pestat_info
+

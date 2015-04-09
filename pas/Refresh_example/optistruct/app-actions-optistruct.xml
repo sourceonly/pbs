@@ -1,0 +1,72 @@
+<ApplicationActions xmlns="http://schemas.altair.com/pbs/2009/01/app-actions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.altair.com/pbs/2009/01/app-actions ../../app-actions.xsd">
+    <ApplicationId>optistruct</ApplicationId>
+    <CustomAction>
+      <JobStates>
+           <JobState>RUNNING</JobState>
+           <JobState>QUEUED</JobState>
+      </JobStates>
+      <Name>SEND_SIGNAL</Name>
+        <DisplayName>Send Signal</DisplayName>
+        <Description>Send Signal</Description>
+        <ArgumentChoice>
+            <ArgumentStringEnumerated>
+                <Name>SIGNAL</Name>
+                <Description>Select Signal and Send It</Description>
+                <DisplayName>SIGNAL</DisplayName>
+                <InputRequired>true</InputRequired>
+                <Option>STOP</Option>
+                <Option>PRINT</Option>
+                <Option>EXIT</Option>
+            </ArgumentStringEnumerated>
+        </ArgumentChoice>
+        <Executable>
+            <Language>PYTHON</Language>
+            <Name>SendSignal.py</Name>
+        </Executable>
+        <ShowOutput>true</ShowOutput>
+    </CustomAction>
+    <CustomAction>
+       <JobStates>
+           <JobState>RUNNING</JobState>
+       </JobStates>
+       <Name>CREATE_PLOT</Name>
+        <DisplayName>Create Plot</DisplayName>
+        <Description>Create a Plot</Description>
+        <ArgumentChoice>
+            <ArgumentString>
+                <Name>TITLE</Name>
+                <Description>Title for the Plot</Description>
+                <DisplayName>Title</DisplayName>
+                <InputRequired>true</InputRequired>
+           </ArgumentString>
+        </ArgumentChoice>
+        <ArgumentChoice>
+            <ArgumentStringEnumerated>
+                <Name>PLOT_TYPE</Name>
+                <Description>Type of the Plot</Description>
+                <InputRequired>true</InputRequired>
+                <Option>Pie Chart</Option>
+                <Option>Line</Option>
+                <Option>Bars</Option>
+                <DefaultValue>Pie Chart</DefaultValue>
+                <Value/>
+            </ArgumentStringEnumerated>
+        </ArgumentChoice>
+        <Executable>
+            <Language>PYTHON</Language>
+            <Name>Plot.py</Name>
+        </Executable>
+    </CustomAction>
+    <CustomAction>
+       <JobStates>
+           <JobState>RUNNING</JobState>
+       </JobStates>
+       <Name>TERMINATE_IMMEDIATELY</Name>
+        <DisplayName>Terminate Immediately</DisplayName>
+        <Description>Terminate Computations Immediately</Description>
+        <Executable>
+            <Language>PYTHON</Language>
+            <Name>MyTerminate.py</Name>
+        </Executable>
+    </CustomAction>
+</ApplicationActions>

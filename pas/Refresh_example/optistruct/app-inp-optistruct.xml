@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TemplateApplicationInput xmlns="http://schemas.altair.com/pbs/2007/02/app-def" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.altair.com/pbs/2007/02/app-def ../../../schemas/app-def.xsd">
+    <ApplicationId>optistruct</ApplicationId>
+    <ApplicationName>Optistruct</ApplicationName>
+    <ApplicationExtension>.fem</ApplicationExtension>
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>VERSION</Name>
+            <Description>Version</Description>
+            <InputRequired>true</InputRequired>
+            <xi:include href="site-config.xml" xpointer="xpath1(//Application[@id='optistruct']/ApplicationVersions//Option)" />
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentString>
+            <Name>JOB_NAME</Name>
+            <Description>Job Name</Description>
+            <InputRequired>true</InputRequired>
+        </ArgumentString>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentStringEnumerated>
+            <Name>BILLING_ACCOUNT</Name>
+            <Description>Billing Account</Description>
+            <InputRequired>true</InputRequired>
+            <xi:include href="site-config.xml" xpointer="xpath1(//JobProjects/Option)"/>
+        </ArgumentStringEnumerated>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentIntEnumerated>
+            <Name>NCPU</Name>
+            <Description>Number of CPUs</Description>
+            <InputRequired>true</InputRequired>
+            <Option>1</Option>
+            <Option>2</Option>
+        </ArgumentIntEnumerated>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentInt>
+            <Name>MEM</Name>
+            <Description>Memory (MB)</Description>
+            <InputRequired>true</InputRequired>
+			<RefreshOnUpdate>true</RefreshOnUpdate>
+            <LowerBound>0</LowerBound>
+            <UpperBound>2000</UpperBound>
+        </ArgumentInt>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentStringMulti>
+            <Name>SOLVER_OPTIONS</Name>
+            <Description>Advanced solver options</Description>
+            <DefaultValue/>
+            <Value/>
+        </ArgumentStringMulti>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentStringMulti>
+            <Name>POST_PROCESSING</Name>
+            <Description>Post process results</Description>
+            <DefaultValue/>
+            <Value/>
+        </ArgumentStringMulti>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentBooleanWithDescription>
+            <Name>ZIP_RESULTS</Name>
+            <Description>Create Zip archive with job results</Description>
+            <InputRequired>false</InputRequired>
+            <FeatureEnabled>false</FeatureEnabled>
+        </ArgumentBooleanWithDescription>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentDirectoryName>
+            <Name>SUBMISSION_DIRECTORY</Name>
+            <Description>Project Directory</Description>
+            <InputRequired>true</InputRequired>
+        </ArgumentDirectoryName>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentFileName>
+            <Name>MASTER</Name>
+            <Description>Master File</Description>
+            <InputRequired>true</InputRequired>
+            <StageinRequired>true</StageinRequired>
+        </ArgumentFileName>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentFileNameMulti>
+            <Name>INCLUDE</Name>
+            <Description>Include File(s)</Description>
+            <InputRequired>false</InputRequired>
+            <StageinRequired>true</StageinRequired>
+            <Value/>
+        </ArgumentFileNameMulti>
+    </ArgumentChoice>
+    <ArgumentChoice>
+        <ArgumentFileName>
+            <Name>RESTART</Name>
+            <Description>Restart File</Description>
+            <InputRequired>false</InputRequired>
+        </ArgumentFileName>
+    </ArgumentChoice>
+    <RefreshScript>refresh.py</RefreshScript>
+    <DefaultRefresh>true</DefaultRefresh>    
+</TemplateApplicationInput>

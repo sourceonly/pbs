@@ -45,30 +45,16 @@ class taskManage():
             return '';
         return res_string;
     
-    def eval_cmd (self, cmd_template, bg=False):
-        ''' use to snap the stdout of a command
-        rc code is stored '''
+    def run_cmd (self, cmd, bg=False):
+	ptask=subprocess.Popen(cmd,shell=False);
+	if bg == False : 
+            ptask.communicate();
+	return ptask.returncode;
+    def get_cmd_result(self,cmd): 
+        ptask=subprocess.Popen(cmd,shell=False,stdout=subprocess.PIPE)
+        return ptask.communicate();
         
-        cmd=self.make_cmd(cmd_template);
-        task=subprocess.Popen(cmd,shell=False, stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE);
-        if not bg :
-            # self.comment=task.stderr.read();
-            return task.stdout.read();
-        self.history.append(cmd);        
-        return "";
-
-    def run_cmd ( self, cmd_template, bg=False) :
-        ''' use to run_cmd,  interactive, all the stdout and stderr are not buffed'''
-        cmd=self.make_cmd(cmd_template);
-        task=subprocess.Popen(cmd,shell=False);
-        task.communicate();
-        self.history.append(cmd);
-        if not bg :
-            self.rc=task.wait();
-            return self.rc;
-        return 0;
-    
-
+	
 
 class Optistruct(taskManage) :
     def __init__ (self):

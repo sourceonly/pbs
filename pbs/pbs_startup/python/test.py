@@ -12,4 +12,14 @@ print A.eval_cmd("sleep @NCPUS@",True)
 #print A.run_cmd("sleep 100")
 print A.eval_cmd("ls -al")
 
+B=taskManage.Optistruct();
+
+
+print B.make_cmd(B.command_template)
+print B.run()
+print B.history
+
+print "======="
+print B.eval_cmd("echo test123");
+print B.history
 

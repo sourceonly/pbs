@@ -14,7 +14,9 @@ class taskManage():
     def make_cmd (self, cmd_template):
         cmd=[];
         for i in re.split(r"\s+", cmd_template):
-            cmd.append(self.make_word(i));
+            segment=self.make_word(i);
+            if segment != '' :
+                cmd.append(self.make_word(i));
         return cmd
 
     def make_word (self, string):
@@ -48,12 +50,11 @@ class taskManage():
         rc code is stored '''
         
         cmd=self.make_cmd(cmd_template);
-        task=subprocess.Popen(cmd,shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE);
-        self.history.append(cmd);
+        task=subprocess.Popen(cmd,shell=False, stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE);
         if not bg :
-            self.rc=task.wait()
-            self.comment=task.stderr.read();
+            # self.comment=task.stderr.read();
             return task.stdout.read();
+        self.history.append(cmd);        
         return "";
 
     def run_cmd ( self, cmd_template, bg=False) :
@@ -66,12 +67,36 @@ class taskManage():
             self.rc=task.wait();
             return self.rc;
         return 0;
+    
 
 
+class Optistruct(taskManage) :
+    def __init__ (self):
+        taskManage.__init__(self);
+        self.command_template="@OPTISTRUCT@ -len @MEM@ -cpu @NCPUS@ @FEM_FILE@ ?@EXTRA_OPTION@"
+        self.license='6200@localhost'
+        self.para['NCPUS']=1
+        self.para['MEM']='100M'
+        self.para['OPTISTRUCT']='/usr/local/bin/optistruct';
+        self.para['EXTRA_OPTION']=' -test abc -j=222 -K"574"'
+
+    def run(self):
+        os.environ['ALTAIR_LICENSE_PATH']=self.license;
+        return self.run_cmd(self.command_template);
+
+class Fluent(taskManage):
+    def __init__ (self):
+        taskManage.__init__(self);
+        self.command_template="@FLUENT@ -t@NCPUS@ -cnf=@HOSTFILE@ -ssh @BACKGROUND@ ?@IB@ @EXTRA_OPTION@ ?@REDIRECTION@"
+        self.license='6200@localhost'
+        self.para['IB']='-pib'
+        self.para['FLUENT']='optistruct'
+        self.para['NCPUS']=10
+        self.para['BACKGROUND']='-g'
+        self.para['REDIRECTION']=' > a.out'
+        self.para['HOSTFILE']='$PBS_NODEFILE'
     
-    
-            
-            
-            
+        
+        
         
         

@@ -159,8 +159,6 @@ class RefreshModule() :
 		self.refreshSourceName=refreshSourceName;
 		return 
         def create_platform (self,apps='Optistruct',platform='PLATFORM') :
-		if self.refreshSourceName != platform : 
-			return None
                 Debug = True
                 if (Debug == True):
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
@@ -168,21 +166,22 @@ class RefreshModule() :
                 else:
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
 
-		try: 
-			old_platform=refreshUtils.getValue(platform)
-		except:
-			pass
-                        
-
                 A=pbs_tools();
                 available_platform=A.get_app_platform(apps);
                 options=A.get_platform_status(available_platform); 
+
+		old_platform=refreshUtils.getValue(platform)
+		if not old_platform : 
+			old_platform=options[0];
+
                 try:
-                        platform_info=refreshUtils.deleteApplicationArg(platform);
+                        refreshUtils.deleteApplicationArg(platform);
                 except:
-                        platform=option[0];
+			pass	
+
+
 		if len(options) > 0 : 
-                	newArg = refreshUtils.createArgumentStringEnum(platform, options,  platform_info, platform_info, platform, platform, True, True)
+                	newArg = refreshUtils.createArgumentStringEnum(platform, options,  old_platform, old_platform, platform, platform, True, True)
                 	refreshUtils.addApplicationArg(newArg, 3);
 			return newArg
                 return None;

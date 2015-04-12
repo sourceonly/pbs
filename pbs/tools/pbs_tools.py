@@ -167,17 +167,22 @@ class RefreshModule() :
                         
                 else:
                         refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
+
+		try: 
+			old_platform=refreshUtils.getValue(platform)
+		except:
+			pass
                         
-                try:
-                        refreshUtils.deleteApplicationArg(platform);
-                except:
-                        pass
 
                 A=pbs_tools();
                 available_platform=A.get_app_platform(apps);
                 options=A.get_platform_status(available_platform); 
+                try:
+                        platform_info=refreshUtils.deleteApplicationArg(platform);
+                except:
+                        platform=option[0];
 		if len(options) > 0 : 
-                	newArg = refreshUtils.createArgumentStringEnum(platform, options,  options[0], options[0], platform, platform, True, True)
+                	newArg = refreshUtils.createArgumentStringEnum(platform, options,  platform_info, platform_info, platform, platform, True, True)
                 	refreshUtils.addApplicationArg(newArg, 3);
 			return newArg
                 return None;

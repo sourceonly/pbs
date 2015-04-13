@@ -46,7 +46,7 @@ class pbs_tools():
 		pbs_nodes_table={}
 		current_host='';
 		output,error=self.pbsnodes();
-		host_reg=re.compile("^[A-Za-z0-9_]+");
+		host_reg=re.compile("^[A-Za-z0-9_\-]+");
 		res_reg=re.compile("\s+([^=]+)=([^=]+)");
 		for i in output.split('\n'):
 			if not i : 

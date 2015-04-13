@@ -10,9 +10,9 @@ class refreshUtils:
 		pbs_env={};
 	def run_cmd (self, cmd) : 
 		res=subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE);
-		res.wait();
+		res.communicate();
 		return res.stdout.read();
-	def get_type_node (	
+	
 
 
 	

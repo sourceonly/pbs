@@ -122,7 +122,8 @@ class pbs_tools():
                                                 
                                 platform[j]['total']+=node_cpu_total;
                                 platform[j]['used']+=node_cpu_assign;
-                                platform[j]['free']+=platform[j]['total']-platform[j]['used'];
+                                #platform[j]['free']+=platform[j]['total']-platform[j]['used'];
+                                platform[j]['free']+=node_cpu_total-node_cpu_assign;
 
                                        
 

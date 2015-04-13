@@ -54,8 +54,15 @@ class taskManage():
         ptask=subprocess.Popen(cmd,shell=False,stdout=subprocess.PIPE)
         return ptask.communicate();
         
-	
 
+
+    
+
+
+
+        
+        
+        
 class Optistruct(taskManage) :
     def __init__ (self):
         taskManage.__init__(self);

@@ -13,7 +13,7 @@ class taskManage():
 
     def make_cmd (self, cmd_template):
         cmd=[];
-        for i in re.split(r"\s+", cmd_template):
+        for i in cmd_template:
             segment=self.make_word(i);
             if segment != '' :
                 cmd.append(self.make_word(i));
@@ -40,20 +40,28 @@ class taskManage():
                 if str(self.para[key])=='' :
                     key_empty_flag=True;
                 res_string=replace_key.sub(str(self.para[key]),res_string);
-            
+                
         if optional_flag and key_not_exist_flag:
             return '';
         return res_string;
     
     def run_cmd (self, cmd, bg=False):
+        self.history.append(" ".join(cmd));
 	ptask=subprocess.Popen(cmd,shell=False);
 	if bg == False : 
             ptask.communicate();
+            self.rc=ptask.returncode
+        
 	return ptask.returncode;
     def get_cmd_result(self,cmd): 
         ptask=subprocess.Popen(cmd,shell=False,stdout=subprocess.PIPE)
         return ptask.communicate();
         
+    def run_app(self, cmd_template, para_dict): 
+        self.para=para_dict;
+        cmd=self.make_cmd(cmd_template);
+        print cmd
+        return self.run_cmd(cmd);
 
 
     

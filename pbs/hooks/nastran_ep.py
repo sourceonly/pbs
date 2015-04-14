@@ -4,24 +4,16 @@ import os
 import sys
 import pbs 
 
-
-
-
-
-
-
 j=pbs.event().job
-
 j_query=pbs.server().job(j.id);
 
 
 soft=j_query.Resource_List["software"].__str__();
 
 
-if not soft == 'Optistruct' : 
+if not soft == 'Nastran' : 
 	sys.exit(0);
 	
-
 
 reserve_ext=['f04','f06','bdf'];
 

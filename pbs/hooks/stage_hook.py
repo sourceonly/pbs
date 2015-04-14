@@ -1,4 +1,14 @@
 #!/usr/bin/python
+'''
+	we use this hook to use 'mv' file , it would significally raise the performance while stagein and stageout are at same io devices , if you don't want to use move, then just delete mv line. 
+	we want to this hook to executable as late as possible. set  default order to 10; 
+
+
+	qmgr -c " c h  stage_hook" 
+	qmgr -c " s h  stage_hook event=execjob_epilogue" 
+	qmgr -c " i h  stage_hook application/x-python default stage_hook.py" 
+	qmgr -c " s h  stage_hook order=10"
+'''
 import os
 import pbs 
 #import subprocess
@@ -25,7 +35,7 @@ try:
 	os.system(" ".join(mkdir_cmd));
 
 
-	cmd=['mv',j.jobdir+"/*",submit_local_dir];
+	cmd=['su','-', str(j.Job_Owner).split('@')[0],'mv',j.jobdir+"/*",submit_local_dir];
 	os.system(" ".join(cmd));
 	
 except:

@@ -60,10 +60,11 @@ class taskManage():
     def run_app(self, cmd_template, para_dict): 
         self.para=para_dict;
         cmd=self.make_cmd(cmd_template);
-        print cmd
-        return self.run_cmd(cmd);
+	try: 
+		return self.run_cmd(cmd);
 
-
+	except: 
+		print cmd
     
 
 

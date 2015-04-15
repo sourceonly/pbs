@@ -10,6 +10,9 @@ A=pbs_tools.pbs_tools();
 #print a
 
 
-print A.pbsnodes_table
-print 'gn01' in A.pbsnodes_table
 
+
+A.pestat()
+
+
+#print A.pbsnodes_table

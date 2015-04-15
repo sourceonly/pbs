@@ -13,6 +13,7 @@ class pbs_tools():
 		self.set_pbs_env;	
 		self.pbsnodes_table=self.get_node_table();
 		self.sep=';'
+		self.pestat_default=['Mom','state','resources_available.pas_applications_enabled','resources_available.platform','resources_available.ncpus','resources_assigned.ncpus','resources_available.mem','resources_assigned.mem','jobs']
 	def set_pbs_env(self):
 		f=open("/etc/pbs.conf","w");
 		for i in f.readlines(): 
@@ -42,10 +43,21 @@ class pbs_tools():
 
 			if res_match : 
 				if not (current_host == "" ) :
-					key=res_match.group(1);
+					key=res_match.group(1).strip(' ');
 					value=res_match.group(2).strip(' ').split(',');
 					pbs_nodes_table[current_host][key]=value;
 		return pbs_nodes_table;
-				
-			
-		
+					
+	def pestat (self):
+		keylist=self.pestat_default; 
+		short=self.pbsnodes_table;
+		content=''
+		for i in short.keys():
+			for j in keylist: 
+				if short[i].has_key(j):	
+					content+=','.join(short[i][j])+self.sep;
+				else: 
+					content+='-'+self.sep
+			content+='\n'
+		print content
+		return ;

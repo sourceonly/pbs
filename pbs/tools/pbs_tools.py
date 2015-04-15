@@ -46,7 +46,7 @@ class pbs_tools():
 		pbs_nodes_table={}
 		current_host='';
 		output,error=self.pbsnodes();
-		host_reg=re.compile("^[A-Za-z0-9]+");
+		host_reg=re.compile("^[A-Za-z0-9_]+");
 		res_reg=re.compile("\s+([^=]+)=([^=]+)");
 		for i in output.split('\n'):
 			if not i : 
@@ -138,7 +138,7 @@ class pbs_tools():
 				if apps in table[node][match_key]: 
 					if table[node].has_key(platform_key): 
 						platform_list+=table[node][platform_key];
-		return platform_list;
+		return list(set(platform_list));
 	def get_platform_status (self, list=[] ): 
 		platform_list=self.table['platform'];
 		if len(list)==0: 

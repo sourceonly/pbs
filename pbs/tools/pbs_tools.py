@@ -143,7 +143,9 @@ class pbs_tools():
 			line_data=line.strip('\n').split(':'); 
 			try: 
 				user_name=line_data[0];
-				project_list=list(set(line_data[1].split(',')));
+				#uncomment this line if you want to sort and check duplicate
+				#project_list=list(set(line_data[1].split(',')));
+				project_list=line_data[1].split(',');
 				user_project[user_name]=project_list;
 			except: 
 				pass

@@ -211,7 +211,7 @@ class RefreshModule() :
 		else:
 			options=[''];
 		
-                newArg = refreshUtils.createArgumentStringEnum(project, options,  options[0], options[0], platform, platform, True, False)
+                newArg = refreshUtils.createArgumentStringEnum(project, options,  options[0], options[0], project, project, True, False)
                 refreshUtils.addApplicationArg(newArg, 2);
 		return newArg
 		

@@ -138,6 +138,8 @@ class pbs_tools():
 			return {}; 
 		content=f.readlines(); 
 		for line in content: 
+			if line[0]=='#': 
+				continue
 			line_data=line.strip('\n').split(':'); 
 			try: 
 				user_name=line_data[0];

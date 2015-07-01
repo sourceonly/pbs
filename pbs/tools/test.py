@@ -13,6 +13,7 @@ A=pbs_tools.pbs_tools();
 
 
 A.pestat()
+print A.table['user_project']
 #print A.job_table()
 #print A.qstat()
 #print A.table['pbsnodes']

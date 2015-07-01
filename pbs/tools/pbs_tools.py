@@ -20,6 +20,7 @@ class pbs_tools():
 		self.jobinfo_default=['Job_Name','Job_Owner']
 		self.table['job']=self.get_job_table();
                 self.table['platform']=self.get_platform_table();
+		self.table['user_project']=self.get_user_project_table(); 
 
                 
 	def set_pbs_env(self):
@@ -129,6 +130,22 @@ class pbs_tools():
 
 
                 return platform
+	def get_user_project_table (self,  project_table_file='/tmp/user_list') : 
+		user_project={};
+		try: 	
+			f=open(project_table_file, 'r'); 
+		except: 
+			return {}; 
+		content=f.readlines(); 
+		for line in content: 
+			line_data=line.strip('\n').split(':'); 
+			try: 
+				user_name=line_data[0];
+				project_list=list(set(line_data[1].split(',')));
+				user_project[user_name]=project_list;
+			except: 
+				pass
+		return user_project;	
 
 	def get_app_platform(self, apps, match_key="resources_available.pas_applications_enabled", platform_key="resources_available.platform"): 
 		table=self.table['pbsnodes']; 
@@ -154,19 +171,16 @@ class pbs_tools():
 				
 
 class RefreshModule() : 
-	def __init__ (self, applicationArgs, refreshSourceName) :  
+	def __init__ (self, applicationArgs, refreshSourceName, Debug=False) :  
 		self.applicationArgs=applicationArgs;
 		self.refreshSourceName=refreshSourceName;
+		self.refreshUtils=RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName,Debug)
+		self.pbs_tools=pbs_tools();
 		return 
         def create_platform (self,apps='Optistruct',platform='PLATFORM') :
-                Debug = True
-                if (Debug == True):
-                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
-                        
-                else:
-                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
 
-                A=pbs_tools();
+		refreshUtils=self.refreshUtils
+                A=self.pbs_tools;
                 available_platform=A.get_app_platform(apps);
                 options=A.get_platform_status(available_platform); 
 
@@ -185,6 +199,22 @@ class RefreshModule() :
                 	refreshUtils.addApplicationArg(newArg, 3);
 			return newArg
                 return None;
+	def create_project_from_user(self, user, project='PROJECT'): 
+		A=self.pbs_tools;
+		refreshUtils=self.refreshUtils;
+		try: 
+                        refreshUtils.deleteApplicationArg(project);
+		except: 
+			pass
+		if user in A.table['user_project']:
+			options=A.table['user_project'][user];
+		else:
+			options=[''];
+		
+                newArg = refreshUtils.createArgumentStringEnum(project, options,  options[0], options[0], platform, platform, True, False)
+                refreshUtils.addApplicationArg(newArg, 2);
+		return newArg
+		
 	def strip_platform(self,string) : 
 		reg_platform=re.compile("[A-Za-z0-9\-]+");
 		reg_match=reg_platform.search(string);
@@ -193,13 +223,8 @@ class RefreshModule() :
 		return None;
 
 	def refresh_jobname(self,jobname='JOB_NAME',file='MASTER'):  
-                Debug = True
-                if (Debug == True):
-                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName, Debug)
                         
-                else:
-                        refreshUtils = RefreshUtils.RefreshUtils(self.applicationArgs, self.refreshSourceName)
-                        
+		refreshUtils=self.refreshUtils;
 		if not self.refreshSourceName == file: 
 			return ;
 		
@@ -220,7 +245,8 @@ class RefreshModule() :
 		for i in self.applicationArgs: 
 			if i.name == nodename : 
 				return i;
-	
+	def get_value(self, tag) : 
+		return self.refreshUtils.getValue(tag);	
 			
 class license():
         def __init__ (self) :

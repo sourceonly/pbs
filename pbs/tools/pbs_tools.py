@@ -21,8 +21,11 @@ class pbs_tools():
 		self.table['job']=self.get_job_table();
                 self.table['platform']=self.get_platform_table();
 		self.table['user_project']=self.get_user_project_table(); 
-
+	def set_pestatf(self,list): 
+		self.pestatf=list;
                 
+	def sef_pesat_sep (self,sep_char): 
+		self.sep=sep_char;
 	def set_pbs_env(self):
 		f=open("/etc/pbs.conf","w");
 		for i in f.readlines(): 
@@ -66,7 +69,11 @@ class pbs_tools():
 		return pbs_nodes_table;
 					
 	def pestat (self):
-		keylist=self.pestat_default; 
+		if self.pestatf 
+			keylist=self.pestatf;
+		else:	
+			keylist=self.pestat_default; 
+	
 		short=self.table['pbsnodes'];
 		content=''
 		for i in short.keys():

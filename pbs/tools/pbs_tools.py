@@ -69,7 +69,7 @@ class pbs_tools():
 		return pbs_nodes_table;
 					
 	def pestat (self):
-		if self.pestatf 
+		if self.pestatf :
 			keylist=self.pestatf;
 		else:	
 			keylist=self.pestat_default; 

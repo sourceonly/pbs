@@ -29,23 +29,44 @@ class mom_info():
 			reg_match=reg_ex.search(i); 
 			if reg_match: 
 				res+=reg_match.groups(1);	
-		return res[-1];
+		return res[-1]+'%';
 		
 	def get_mem_info(self): 
 		mem_run=subprocess.Popen(['/usr/bin/free'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		out,err=mem_run.communicate();
 		reg_ex=re.compile("^Mem:");
-		res=[];
 		for i in out.split('\n'): 
 			reg_match=reg_ex.search(i); 
 			if reg_match: 
-				return re.split('\s+',i.split(':')[1]);
-		
+				return re.split('\s+',i.split(':')[2]);
+	
+	def get_disk_info(self,disk='/'):
+                disk_run=subprocess.Popen(['/bin/df', '-lP'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                out,err=disk_run.communicate();
+                reg_ex=re.compile("%s$" % disk);
+                percent={}
+                for i in out.split('\n'):
+                        reg_match=reg_ex.search(i);
+                        if reg_match:
+                                value_list=re.split('\s+',i);
+                                key=value_list[-1];
+                                percent[key]=value_list[-2];
+
+                return percent
+	
 			
 mom=mom_info();
 
 mom.set_resource_available("cpu_usage",mom.get_cpu_info());
 mom.set_resource_available("mem_usage",mom.get_mem_info()[1]);
+mom.set_resource_available("disk_usage",mom.get_disk_info('/')['/']);
+
+
+
+
+
+
+
 #mom.get_resource("resources_available","ncpus");
 
 

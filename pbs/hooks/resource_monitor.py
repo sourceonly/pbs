@@ -38,7 +38,7 @@ class mom_info():
 		for i in out.split('\n'): 
 			reg_match=reg_ex.search(i); 
 			if reg_match: 
-				return re.split('\s+',i.split(':')[2]);
+				return re.split('\s+',i.split(':')[1]);
 	
 	def get_disk_info(self,disk='/'):
                 disk_run=subprocess.Popen(['/bin/df', '-lP'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -58,7 +58,7 @@ class mom_info():
 mom=mom_info();
 
 mom.set_resource_available("cpu_usage",mom.get_cpu_info());
-mom.set_resource_available("mem_usage",mom.get_mem_info()[1]);
+mom.set_resource_available("mem_usage",mom.get_mem_info()[2]);
 mom.set_resource_available("disk_usage",mom.get_disk_info('/')['/']);
 
 

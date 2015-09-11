@@ -38,8 +38,8 @@ class pbs_tools():
 		pbs_node_out,pbs_node_err=pbsnodes_task.communicate();
 		return pbs_node_out,pbs_node_err
 		
-	def qstat(self, args='-f') : 
-		cmd=['qstat', args];
+	def qstat(self, args=['-f']) : 
+		cmd=['qstat']+args;
 		qstat_task=subprocess.Popen(cmd,shell=False,stdout=subprocess.PIPE);
 		qstat_out,qstat_err=qstat_task.communicate();
 		cl_reg=re.compile("\n\t");
@@ -85,7 +85,7 @@ class pbs_tools():
 			content+='\n'
 		print content,
 		return ;
-	def get_job_table (self,args='-f'): 
+	def get_job_table (self,args=['-f'] ): 
 		qstat_f={};
 		jobid_reg=re.compile("^Job Id");
 		res_reg=re.compile("\s+([^=]+)=(.+)");

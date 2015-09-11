@@ -83,7 +83,7 @@ class pbs_tools():
 				else: 
 					content+='-'+self.sep
 			content+='\n'
-		print content
+		print content,
 		return ;
 	def get_job_table (self,args='-f'): 
 		qstat_f={};

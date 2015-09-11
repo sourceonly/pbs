@@ -81,7 +81,7 @@ class pbs_tools():
 				if short[i].has_key(j):	
 					content+=','.join(short[i][j])+self.sep;
 				else: 
-					content+='-'+self.sep
+					content+=''+self.sep
 			content+='\n'
 		print content,
 		return ;

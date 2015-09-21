@@ -112,7 +112,7 @@ if (open(QSTAT , "qstat -f | tr '\n' '!' | sed 's/\!\t//g' | tr '!' '\n' |")) {
 	close(QSTAT) 
 }
 my $c=";";
-print("Job_Num;Job_Name;User;SoftWare;Node_Num;Core_Num;Status;Date_Time\n");
+print("Job_Num;Job_Name;User;SoftWare;Node_Num;Core_Num;Status;Date_Time;Priority\n");
 foreach my $jobid (sort (keys (%jobstat))) {
-	printf "%d$c%s$c%s$c%s$c%d$c%d$c%s$c%s\n", $jobid, $jobstat{$jobid}{name}, $jobstat{$jobid}{user}, $jobstat{$jobid}{soft}, $jobstat{$jobid}{nhosts},$jobstat{$jobid}{ncpus},$jobstat{$jobid}{qstat},$jobstat{$jobid}{date};
+	printf "%d$c%s$c%s$c%s$c%d$c%d$c%s$c%s$c%d\n", $jobid, $jobstat{$jobid}{name}, $jobstat{$jobid}{user}, $jobstat{$jobid}{soft}, $jobstat{$jobid}{nhosts},$jobstat{$jobid}{ncpus},$jobstat{$jobid}{qstat},$jobstat{$jobid}{date}, 10;
 }

@@ -1,0 +1,131 @@
+#!/usr/bin/python
+import sys
+import os
+import subprocess
+cmd=sys.argv[0];
+cmd_dir=os.path.dirname(cmd)
+sys.path.append(cmd_dir)
+
+import pbs_tools
+
+import subprocess
+import re
+def get_user_job (username=None) :
+        queues=get_user_queue(username);
+        if username==None : 
+                qselect=subprocess.Popen(['/opt/pbs/default/bin/qselect' ], stdout=subprocess.PIPE);
+        elif not queues == []  :
+		for i in get_queue_user(queues): 
+			username+=','
+			username+=i;
+		print username
+                qselect=subprocess.Popen(['/opt/pbs/default/bin/qselect','-u',"%s" % username],stdout=subprocess.PIPE);
+
+        else: 
+                qselect=subprocess.Popen(['/opt/pbs/default/bin/qselect','-u','%s' % username],stdout=subprocess.PIPE);
+
+        out,err=qselect.communicate();
+        return out.split('\n')
+def get_user_queue(username=None): 
+        print_queue=subprocess.Popen('/opt/pbs/default/bin/qmgr -c "print queue @default"',shell=True,stdout=subprocess.PIPE)
+        out,err=print_queue.communicate();      
+        re_reg=re.compile("set queue ([A-Za-z0-9]+) resources_available.managers \+?= %s" % username);
+        queue_names=[];
+        for i in out.split('\n'):
+                reg_match=re_reg.search(i);
+                if reg_match :
+                        queue_name=reg_match.group(1);
+                        queue_names+=[queue_name];
+        return queue_names;
+
+
+
+def get_queue_user(queuename): 
+	users=[];
+	outs=""
+	for i in queuename: 
+        	print_queue=subprocess.Popen('/opt/pbs/default/bin/qmgr -c "print queue @default"',shell=True,stdout=subprocess.PIPE)
+        	out,err=print_queue.communicate();      
+		outs+=out+'\n';
+        re_reg=re.compile("set queue ([A-Za-z0-9]+) acl_users \+?= ([A-Za-z0-9\.]+)" );
+	
+	for i in outs.split('\n'):
+		reg_match=re_reg.search(i); 
+		if reg_match: 
+			queue=reg_match.group(1);
+			user=reg_match.group(2);
+			if queue in queuename: 
+				users+=[user];
+		users=list(set(users));
+	return users
+
+
+
+job=pbs_tools.pbs_tools();
+if len(sys.argv)>1: 
+	user_name=sys.argv[1];
+else: 
+	user_name=None;
+job_list=get_user_job(user_name);
+job_list_table=job.get_job_table();
+
+
+sep=';'
+output_format=['Job_Name','Job_Owner','Resource_List.software','Resource_List.nodect', 'Resource_List.ncpus','job_state','stime','Resource_List.higher'];
+
+def strip_input(tag,value):
+	if tag=='Job_Owner': 
+		return value[0].split('@')[0];
+	if tag=='stime': 
+		# sample 'Fri Sep 11 14:28:09 2015'
+		time_value={};
+		time_list=value[0].split(" ")
+		year=time_list.pop(); 
+		time_value['year']=year;
+		h_m_s=time_list.pop().split(":");
+		time_value['hour']=h_m_s[0];
+		time_value['minute']=h_m_s[1];
+		time_value['second']=h_m_s[2];
+		day=time_list.pop();
+		time_value['day']=day;
+		month=time_list.pop();
+		month_full=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		real_month=str(month_full.index(month) + 1);
+		time_value['month']=real_month;
+	
+		weekday=time_list.pop();	
+		weekday_full=['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+		real_weekday=str(weekday_full.index(weekday) + 1);
+		time_value['weekday']=real_weekday;
+		return "%s-%s-%s" % (time_value['year'],time_value['month'],time_value['day']);
+		
+			
+	else: 
+		return value[0];
+
+def header () : 
+	print "Job_Num;Job_Name;User;SoftWare;Node_Num;Core_Num;Status;Date_Time;Priority";
+
+def output(table,job_list,output_format,sep=';'): 
+	header();
+	if job_list==['']: 
+		return
+	ikeys=table.keys();
+	content=''
+	for i in job_list:
+		if not i in ikeys: 	
+			continue;
+		content+=i.split('.')[0]+sep;
+		jkeys=table[i].keys();
+		for j in output_format: 
+			if not j in jkeys:
+				value='';
+			else: 
+				value=strip_input(j,table[i][j]);
+			content+=value+sep;
+		content+='\n'
+	print content,
+		
+output(job_list_table,job_list,output_format,sep);
+
+

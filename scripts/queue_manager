@@ -1,0 +1,254 @@
+#!/bin/bash
+
+# init enviroment
+. /etc/pbs.conf
+export PATH=${PBS_EXEC}/bin/:$PATH
+
+get_queue () {
+    qmgr -c "p q @default" | grep "create queue" | awk '{print $3}'
+}
+
+create_queue () {
+    if [ z"$1" == z ] 
+    then
+	return
+    fi
+    queue_name=$1
+    p_q=`qmgr -c " p q @default"`
+    grep_q=`echo "$p_q" | grep "create queue $queue_name"`
+    if [ -z "$grep_q" ] 
+    then 
+	qmgr -c "c q $queue_name"
+	qmgr -c "set queue $queue_name queue_type = Execution"
+	qmgr -c "set queue $queue_name enabled = True"
+	qmgr -c "set queue $queue_name started = True"
+	qmgr -c "set queue $queue_name acl_user_enable = True"
+	echo create queue with name $queue_name
+    else 
+	echo queue $queue_name exist, doing nothing
+    fi
+    shift
+    echo $*
+    create_queue $*
+}
+
+delete_queue () {
+    if [ z"$1" == z ] 
+    then
+	return
+    fi
+    queue_name=$1 
+    p_q=`qmgr -c " p q @default"`
+    grep_q=`echo "$p_q" | grep "create queue $queue_name"`
+    if [ -z "$grep_q" ] 
+    then 
+	echo $queue_name not exist, do nothing
+    else 
+	qmgr -c "d q $queue_name"
+    fi
+    shift
+    delete_queue $*
+}
+get_queue_start_time () {
+	queue_name=$1
+	qmgr -c " p q $queue_name" | grep resources_available.pstart_time | awk -F'=' '{print $2}' | awk '{print $1}'	
+}
+get_queue_end_time () {
+	queue_name=$1 
+	qmgr -c " p q $queue_name" | grep resources_available.pend_time | awk -F'=' '{print $2}' | awk '{print $1}'	
+}
+set_queue_start_time () {
+	queue_name=$1
+	ptime=$2
+	qmgr -c "s q $queue_name resources_available.pstart_time=$ptime"
+}
+
+set_queue_end_time () {
+	queue_name=$1
+	etime=$2
+	qmgr -c "s q $queue_name resources_available.pstart_time=$etime"
+}
+assign_priority_to_queue () {
+    queue_name=$1
+    queue_pri=$2
+    if [ -z "$queue_pri" ]  
+    then
+	queue_pri=100
+    fi
+    qmgr -c "s q $queue_name Priority=$queue_pri"
+}
+
+get_priority_of_queue () {
+    queue_name=$1
+    pri=`qmgr -c " p q $queue_name" | grep Prio | awk -F"=" '{print $2}'`
+    if [ z"$pri" == z ] 
+    then
+	echo 100
+    else 
+	echo $pri
+    fi
+}
+
+create_queue_with_pri () {
+    queue_name=$1
+    queue_pri=$2
+    create_queue $queue_name
+    assign_priority_to_queue $queue_name $queue_pri
+}
+
+assign_user_to_queue () {
+    queue_name=$1
+    shift 
+	TMP=`echo $* | sed "s/,/ /g"`
+    eval set -- $TMP
+    while [ z"$1" != z ] 
+    do
+	qmgr -c " s q $queue_name acl_users+=$1" 2>/dev/null
+	shift
+    done
+}
+
+delete_user_to_queue () {
+    queue_name=$1
+    shift 
+    eval set -- $*
+    while [ z"$1" != z ] 
+    do
+	qmgr -c " s q $queue_name acl_users-=$1" 2>/dev/null
+	shift
+    done
+}
+
+get_queue_user () {
+    queue_name=$1
+    qmgr -c " p q $queue_name"  | grep acl_users  | awk -F'=' '{print $2}' | awk '{print $1}'
+}
+
+get_user_queue () {
+    user_name=$1
+    qmgr -c "p q @default"  | grep acl_users | grep -e "\\<$user_name\\>" | awk '{print $3}' | sort | uniq
+}
+
+
+dump_queue_info_by_users () {
+    config_file=$1
+    TMP=`mktemp -t pmanager.sh.XXXXXX`
+    trap "rm $TMP* 2>/dev/null" EXIT
+    users=`qmgr -c " p q @default" | grep acl_users | awk -F'=' '{print $2}' | awk '{print $1}' | sort | uniq`
+	echo "DEFAULT=NONE" >> $TMP
+    for i in $users 
+    do
+	projects=`qmgr -c "p q @default" | grep -e "\\<$i\\>" | awk '{print $3}' | tr "\n" "," | sed "s/,$//g"`
+       	echo "$i=$projects" >> $TMP
+    done
+    cp -f $TMP $config_file
+}
+
+get_pbs_data () {
+    echo "queuename;users;priority"
+    queue=`get_queue`
+    for i in $queue 
+    do
+	users=`get_queue_user $i `
+	pri=`get_priority_of_queue $i`
+	if [ z"$users" == z ] 
+	then 
+		echo "$i;;$pri"
+	fi		
+	for j in $users 
+	do
+	    echo "$i;$j;$pri"
+	done
+    done
+    
+}
+
+get_pbs_data_byuser () {
+
+	user_name=$1
+    echo "queuename;users;priority"
+	queue=`get_user_queue $user_name`	
+#    queue=`get_queue`
+    for i in $queue 
+    do
+	users=`get_queue_user $i `
+	pri=`get_priority_of_queue $i`
+	if [ z"$users" == z ] 
+	then 
+		echo "$i;;$pri"
+	fi		
+	for j in $users 
+	do
+	    echo "$i;$j;$pri"
+	done
+    done
+}
+
+
+
+
+
+
+get_pbs_data2 () {
+    echo "queuename;users;priority"
+    queue=`get_queue`
+    for i in $queue 
+    do
+	users=`get_queue_user $i | tr "\n" ',' | sed "s/,$//g"`
+	pri=`get_priority_of_queue $i`
+	echo "$i;$pri;$users"
+    done
+}
+
+get_pbs_data2_byuser () {
+	user_name=$1
+    echo "queuename;users;priority"
+	queue=`get_user_queue $user_name`	
+		
+    for i in $queue 
+    do
+	users=`get_queue_user $i | tr "\n" ',' | sed "s/,$//g"`
+	pri=`get_priority_of_queue $i`
+	echo "$i;$pri;$users"
+    done
+	
+}
+
+
+read_conf_line () {
+    line=`echo $1 | tr "," " "`
+    eval set -- $line
+    queue_name=$1
+    shift 
+    queue_pri=$1
+    shift
+    user=$*
+    create_queue_with_pri $queue_name $queue_pri
+    assign_user_to_queue $queue_name $user
+}
+
+read_conf_file () {
+    conf_file=$1
+    while read line 
+    do
+	read_conf_line $line
+    done < $conf_file
+}
+export_backup_file () {
+    conf_file=$1
+    qmgr -c " p q @default " >  $conf_file
+}
+
+import_backup_file () {
+    conf_file=$1
+    qmgr < $conf_file
+}
+
+$* 
+#dump_queue_info_by_users ./tempfile 
+
+
+
+
+
+

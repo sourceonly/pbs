@@ -1,0 +1,107 @@
+#!/bin/bash 
+. /etc/pas.conf
+export PAS_CONF_FILE=/etc/pas.conf
+export PATH=$PAS_EXEC/pas-commands/bin:$PATH
+proc_name=$0
+usage_wrong_args () {
+	cat <<EOF
+usage: wrong type args  
+should be $proc_name --ApplicationId <ApplicationId> ... 
+EOF
+}
+
+usage_applications () {
+	cat <<EOF
+usage: avaiable applicationIds
+`pas-getapps`
+EOF
+}
+usage_application () {
+	apps=$1
+	cat <<EOF
+usage: available ARGS for $apps
+`pas-getapps -a $apps`
+EOF
+}
+if [ z"$1" != z"--ApplicationId" ] 
+then 
+	usage_wrong_args
+	exit 1
+fi
+
+shift 
+
+apps_list=`pas-getapps`
+apps="$1"
+if [ z"$apps" == "z" ] 
+then 
+	echo ApplicationId Should not be Empty!
+	exit 1
+fi
+
+match=`echo "$apps_list" | grep "^\${apps}$" `
+if [ "$match" == "" ] 
+then
+	usage_applications
+	exit 1
+fi
+if [ "$match" != "$apps" ]
+then 
+	usage_application $apps
+	exit 1
+fi
+
+shift 
+
+args_list=`pas-getapp -a $apps`
+submit_file=`mktemp /tmp/pas_file_XXXXX`
+#trap "rm -f $submit_file" 0
+
+var_list=`echo "$args_list" | sed "s/(.*)/=/g"`
+echo "$var_list" > $submit_file
+eval "$var_list"
+args_lines=`echo "$args_list" | sed "/=/d"`
+args_string=`echo "$args_lines" | sed "s/(true)/:/g" | sed  "s/(false)/:/g" | tr "\n" ,`
+echo "$args_string"
+
+
+TMP=`getopt -o h -l $args_string -- $*`
+eval set -- $TMP
+
+while [ $1 != -- ] 
+do
+	echo "${1#--}=$2" >> $submit_file
+	shift 2
+done
+
+convert_path () {
+	pbscp_path=`echo $1 | grep pbscp:`
+	if [ z"$pbscp_path" == z"$1" ] 
+	then 
+		echo $1
+		return 0
+	fi
+        pwd=`pwd | tr '/' ','`
+        path=`echo $1 | tr '/' ','| sed "s/^ \+//g" | sed "s/ \+$//g" | sed "s/^\.,/$pwd,/g" | sed "s/^\([^,]\)/$pwd,\1/g" | tr ',' '/'`
+        hostname=`hostname`
+        path=pbsscp://`echo $hostname/$path | sed "s/\/\+/\//g"`
+	echo $path
+}
+
+
+
+pas-submit -f $submit_file
+
+
+
+
+
+
+## test area 
+#usage_wrong_args
+#usage_application
+#!/bin/bash
+
+##example commandline usage 
+## app_sub --ApplicationId Ug --JOB_NAME=test1 --NCPU=20 --SUBMISSION_DIRECTORY=pbscp://`hostname`/$HOME --VERSION=5.8 --GEOMETRY=1200x1456 --CONNECT_ENABLED=true
+

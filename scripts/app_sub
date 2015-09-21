@@ -57,12 +57,13 @@ args_list=`pas-getapp -a $apps`
 submit_file=`mktemp /tmp/pas_file_XXXXX`
 #trap "rm -f $submit_file" 0
 
-var_list=`echo "$args_list" | sed "s/(.*)/=/g"`
+var_list=`echo "$args_list" | sed "s/(.*).*$/=/g"`
 echo "$var_list" > $submit_file
 eval "$var_list"
-args_lines=`echo "$args_list" | sed "/=/d"`
-args_string=`echo "$args_lines" | sed "s/(true)/:/g" | sed  "s/(false)/:/g" | tr "\n" ,`
-echo "$args_string"
+
+args_lines=`echo "$args_list" | sed "1,3d"`
+args_string=`echo "$args_lines" | sed "s/(true).*$/:/g" | sed  "s/(false).*$/:/g" | tr "\n" ,`
+#echo "$args_string"
 
 
 TMP=`getopt -o h -l $args_string -- $*`

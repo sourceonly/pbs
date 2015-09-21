@@ -76,10 +76,18 @@ class pbs_tools():
 	
 		short=self.table['pbsnodes'];
 		content=''
+
+		job_table=self.get_job_table();
+		def strip_job(str): 
+			jobid=str.split('/')[0]
+			return jobid.split('.')[0]+'/'+job_table[jobid]['Job_Owner'][0].split('@')[0]
 		for i in short.keys():
 			for j in keylist: 
 				if short[i].has_key(j):	
-					content+=','.join(short[i][j])+self.sep;
+					if  j=="jobs": 
+						content+=",".join(list(set(map(strip_job,short[i][j]))));
+					else: 
+						content+=','.join(short[i][j])+self.sep;
 				else: 
 					content+=''+self.sep
 			content+='\n'

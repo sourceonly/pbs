@@ -18,7 +18,6 @@ def get_user_job (username=None) :
 		for i in get_queue_user(queues): 
 			username+=','
 			username+=i;
-		print username
                 qselect=subprocess.Popen(['/opt/pbs/default/bin/qselect','-u',"%s" % username],stdout=subprocess.PIPE);
 
         else: 
@@ -79,7 +78,8 @@ def strip_input(tag,value):
 	if tag=='stime': 
 		# sample 'Fri Sep 11 14:28:09 2015'
 		time_value={};
-		time_list=value[0].split(" ")
+		import re
+		time_list=re.split(" +", value[0])
 		year=time_list.pop(); 
 		time_value['year']=year;
 		h_m_s=time_list.pop().split(":");

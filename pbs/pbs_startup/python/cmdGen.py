@@ -9,13 +9,10 @@ import re
 class cmdGen: 
 	def __init__(self):
 		self.data_table={};
-		self.data_table['EXEC']='Optistruct'
-		self.data_table['CPU']='10'
-		self.data_table['MEM']='10'
 		self.template=[];
 		
 	def update_data_table(self,key,value): 
-		self.date_table[key]=value;
+		self.data_table[key]=value;
 	def update_template(self,template_list): 
 		self.template=template_list;
 	def convert_argv(self,argv): 
@@ -57,6 +54,8 @@ class cmdGen:
 		
 		return shlex.split(" ".join(list));
 
+	def cmd_gen(self): 
+		return self.list_sub(self.template);
 
 '''
 b=cmdGen();

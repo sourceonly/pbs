@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+print dir()
+
+
 import re
 import os
 import sys

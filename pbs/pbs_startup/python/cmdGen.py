@@ -4,7 +4,7 @@
 '''
 
 
-
+import shlex
 import re
 class cmdGen: 
 	def __init__(self):
@@ -54,7 +54,9 @@ class cmdGen:
 	def list_sub(self,list): 
 		for i in range(len(list)): 	
 			list[i]=self.symbol_replace(list[i]);
-		return list
+		
+		return shlex.split(" ".join(list));
+
 
 '''
 b=cmdGen();
@@ -63,4 +65,5 @@ a={}
 a['EXEC']="AAA"
 a['CPU']="ABC"
 print b.list_sub(['@EXEC@','-cpu @CPU@','?-len @MEM@'])
+
 '''

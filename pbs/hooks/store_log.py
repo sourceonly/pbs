@@ -13,7 +13,6 @@ j=e.job;
 path=pbs.server().resources_available['store_path']
 
 
-
 os.system('/usr/bin/scp ' + '/var/spool/PBS/spool/' + j.id+'.OU'+ ' '  + path);
 os.system('/usr/bin/scp ' + '/var/spool/PBS/spool/' + j.id+'.ER'+ ' '  + path);
 

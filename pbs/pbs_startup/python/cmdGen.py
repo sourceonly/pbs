@@ -6,6 +6,7 @@
 
 import shlex
 import re
+import subprocess
 class cmdGen: 
 	def __init__(self):
 		self.data_table={};
@@ -45,7 +46,6 @@ class cmdGen:
 		return self.strip_argv(argv)
 		
 	def symbol_replace(self,argv):
-		print self.data_table
 		return self.symbol_sub(argv,self.data_table);
 
 	def list_sub(self,list): 
@@ -57,6 +57,8 @@ class cmdGen:
 	def cmd_gen(self): 
 		return self.list_sub(self.template);
 
+					
+	
 '''
 b=cmdGen();
 a={}

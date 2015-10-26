@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-print dir()
+
 
 
 import re
@@ -13,11 +13,11 @@ class taskManage():
         self.snapshot={};
         self.rc=1;
         self.history=[];
-
     
-    def run_cmd (self, cmd, bg=False):
+    def spawn_cmd (self, cmd):
         self.history.append(" ".join(cmd));
 	ptask=subprocess.Popen(cmd,shell=False);
+	self.pid=ptask.pid
 	if bg == False : 
             ptask.communicate();
             self.rc=ptask.returncode
@@ -26,11 +26,11 @@ class taskManage():
     def get_cmd_result(self,cmd): 
         ptask=subprocess.Popen(cmd,shell=False,stdout=subprocess.PIPE)
         return ptask.communicate();
-        
+ 
     
 
 
-
+		
         
         
         

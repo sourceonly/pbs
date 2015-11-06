@@ -80,7 +80,7 @@ class pbs_tools():
 		job_table=self.get_job_table();
 		def strip_job(str): 
 			jobid=str.split('/')[0]
-			return jobid.split('.')[0]+'/'+job_table[jobid]['Job_Owner'][0].split('@')[0]
+			return jobid.split('.')[0]+'/'+job_table[jobid.strip(' ')]['Job_Owner'][0].split('@')[0]
 		for i in short.keys():
 			for j in keylist: 
 				if short[i].has_key(j):	

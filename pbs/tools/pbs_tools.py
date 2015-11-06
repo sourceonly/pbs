@@ -12,7 +12,7 @@ except:
 
 class pbs_tools(): 
 	def __init__ (self):
-		self.set_pbs_env;	
+		self.set_pbs_env();	
 		self.table={};
 		self.table['pbsnodes']=self.get_node_table();
 		self.sep=';'
@@ -27,11 +27,11 @@ class pbs_tools():
 	def sef_pesat_sep (self,sep_char): 
 		self.sep=sep_char;
 	def set_pbs_env(self):
-		f=open("/etc/pbs.conf","w");
+		f=open("/etc/pbs.conf","r");
 		for i in f.readlines(): 
 			pair=i.split("=");
-			os.environ[pair[0]]=pair[1];
-		os.environ['PATH']=os.environ['PBS_EXEC']+"bin:"+os.environ['PATH'];
+			os.environ[pair[0]]=pair[1].strip('\n');
+		os.environ['PATH']=os.environ['PBS_EXEC']+"/bin:"+os.environ['PATH'];
 	def pbsnodes (self, args='-av'): 
 		cmd=['pbsnodes' , args];
 		pbsnodes_task=subprocess.Popen(cmd,shell=False, stdout=subprocess.PIPE);

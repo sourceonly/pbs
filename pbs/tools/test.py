@@ -4,6 +4,8 @@
 import pbs_tools
 A=pbs_tools.pbs_tools();
 
+
+print A.get_app_platform("Optistruct")
 #p=A.get_node_table();
 #print p
 #a,b=A.pbsnodes();
@@ -18,7 +20,11 @@ print A.table['user_project']
 #print A.qstat()
 #print A.table['pbsnodes']
 #print A.table['platform']
+
 #platform=A.get_app_platform("Optistruct")
+
+
+
 #print A.get_platform_status(platform);
 
 

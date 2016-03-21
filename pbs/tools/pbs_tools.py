@@ -233,7 +233,7 @@ class pbs_tools():
 		job_queue_table={}
 		for i in job_table: 
 			if job_table[i].has_key('queue'): 
-				if job_table[i]['queue'] == queue
+				if job_table[i]['queue'] == queue:
 					job_queue_table[i]=job_table[i];
 		return job_queue_table
 	def get_queue_job_by_user(self,username): 

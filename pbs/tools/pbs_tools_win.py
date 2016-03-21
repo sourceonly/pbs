@@ -13,6 +13,7 @@ except:
 class pbs_tools(): 
 	def __init__ (self):
 		self.set_pbs_env();	
+		os.environ['PBS_SERVER']='owner-pc'
 		self.table={};
 		self.table['pbsnodes']=self.get_node_table();
 		self.sep=';'
@@ -186,20 +187,6 @@ class pbs_tools():
 			platform_info.append(platform_string);
 		return platform_info;
 			
-	def qmgr_pn (self, node='@default'): 
-		qmgr_pn=subprocess.Popen(['qmgr','-c','p n @default'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-		out,err=qmgr_pn.communicate();
-		return out,err
-	def qmgr_ps (self): 
-		qmgr_ps=subprocess.Popen(['qmgr','-c','p s'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-		out,err=qmgr_ps.communicate();
-		return out,err
-	
-		
-		
-		
-				
-		
 		
 				
 
@@ -281,7 +268,6 @@ class RefreshModule() :
 	def get_value(self, tag) : 
 		return self.refreshUtils.getValue(tag);	
 			
-	
 class license():
         def __init__ (self) :
                 self.lmstat='/usr/local/bin/lmstat'

@@ -238,7 +238,7 @@ class pbs_tools():
 		return job_queue_table
 	def get_queue_job_by_user(self,username): 
 		queue=self.get_user_queue(username);
-		if queue == '' 
+		if queue == '' :
 			return '' 
 		return self.get_queue_job_table(queue);
 	

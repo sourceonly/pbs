@@ -34,3 +34,9 @@ A=pbs_tools.pbs_tools();
 
 #print A.pbsnodes_table
 
+
+#print a[0]
+
+#print A.table['queue']
+print A.get_user_queue('test1')
+

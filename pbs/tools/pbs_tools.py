@@ -21,6 +21,7 @@ class pbs_tools():
 		self.table['job']=self.get_job_table();
                 self.table['platform']=self.get_platform_table();
 		self.table['user_project']=self.get_user_project_table(); 
+		self.table['queue']=self.qmgr_get_queue();
 	def set_pestatf(self,list): 
 		self.pestatf=list;
                 
@@ -194,11 +195,53 @@ class pbs_tools():
 		qmgr_ps=subprocess.Popen(['qmgr','-c','p s'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		out,err=qmgr_ps.communicate();
 		return out,err
-	
 		
-		
-		
+	def queue_parse(self,content): 
+		qtable={}
+		comment=re.compile("#");
+		queue_patter="[A-Za-z0-9\-\+_\[\]]+"
+		set_pattern=re.compile("set[ \t]+queue[ \t]+(%s)[ \t]+(%s)[ \t]+\+?=[ \t]+(%s)" % (queue_patter, queue_patter, queue_patter));
+		for i in content.split('\n'): 
+			comment_res=comment.search(i);
+			if comment_res: 		
+				continue
+			set_res=set_pattern.search(i);
+			if set_res:
+				name=set_res.group(1);
+				key=set_res.group(2);
+				value=set_res.group(3)
+				if not qtable.has_key(name): 
+					qtable[name]={}
+				if not qtable[name].has_key(key): 
+					qtable[name][key]=[];
+				qtable[name][key].append(value);
+		return qtable
 				
+	def qmgr_get_queue(self):
+		return self.queue_parse(self.qmgr_ps()[0]);
+		
+	def get_user_queue(self,username): 
+		queue_table=self.table['queue']		
+		for i in queue_table: 
+			if queue_table[i].has_key('acl_users'):
+				if username in queue_table[i]['acl_users'] : 
+					return i 
+		return ''	
+		
+	def get_queue_job_table(self,queue): 
+		job_table=self.table['job']
+		job_queue_table={}
+		for i in job_table: 
+			if job_table[i].has_key('queue'): 
+				if job_table[i]['queue'] == queue
+					job_queue_table[i]=job_table[i];
+		return job_queue_table
+	def get_queue_job_by_user(self,username): 
+		queue=self.get_user_queue(username);
+		if queue == '' 
+			return '' 
+		return self.get_queue_job_table(queue);
+	
 		
 		
 				

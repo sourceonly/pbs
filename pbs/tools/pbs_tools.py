@@ -199,7 +199,7 @@ class pbs_tools():
 	def queue_parse(self,content): 
 		qtable={}
 		comment=re.compile("#");
-		queue_patter="[A-Za-z0-9\-\+_\[\]]+"
+		queue_patter="[\.A-Za-z0-9\-\+_\[\]]+"
 		set_pattern=re.compile("set[ \t]+queue[ \t]+(%s)[ \t]+(%s)[ \t]+\+?=[ \t]+(%s)" % (queue_patter, queue_patter, queue_patter));
 		for i in content.split('\n'): 
 			comment_res=comment.search(i);
@@ -233,7 +233,7 @@ class pbs_tools():
 		job_queue_table={}
 		for i in job_table: 
 			if job_table[i].has_key('queue'): 
-				if job_table[i]['queue'] == queue:
+				if queue in job_table[i]['queue'] :
 					job_queue_table[i]=job_table[i];
 		return job_queue_table
 	def get_queue_job_by_user(self,username): 

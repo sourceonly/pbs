@@ -69,7 +69,7 @@ class pbs_tools():
 					pbs_nodes_table[current_host][key]=value;
 		return pbs_nodes_table;
 					
-	def pestat (self):
+	def pestat (self,match={}):
 		if 'pestatf' in self.__dict__ :
 			keylist=self.pestatf;
 		else:	
@@ -83,8 +83,18 @@ class pbs_tools():
 			jobid=str.split('/')[0]
 			return jobid.split('.')[0]+'/'+job_table[jobid.strip(' ')]['Job_Owner'][0].split('@')[0]
 		for i in short.keys():
+			continue_i=0
+			for z in match: 
+				if short[i].has_key(z): 
+					if not match[z]	in short [i][z] :
+						continue_i=1
+				else 
+					continue_i=1
+			if continue_i == 1 :
+				continue
 			for j in keylist: 
 				if short[i].has_key(j):	
+						
 					if  j=="jobs": 
 						content+=",".join(list(set(map(strip_job,short[i][j]))));
 					else: 
@@ -92,7 +102,8 @@ class pbs_tools():
 				else: 
 					content+=''+self.sep
 			content+='\n'
-		print content,
+		if content!='':
+			print content,
 		return ;
 	def get_job_table (self,args=['-f'] ): 
 		qstat_f={};

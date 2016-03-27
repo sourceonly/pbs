@@ -88,7 +88,7 @@ class pbs_tools():
 				if short[i].has_key(z): 
 					if not match[z]	in short [i][z] :
 						continue_i=1
-				else 
+				else: 
 					continue_i=1
 			if continue_i == 1 :
 				continue

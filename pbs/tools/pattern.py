@@ -14,7 +14,6 @@ class pattern () :
 		return keys
 	def __filter__(self,obj,filter) : 
 		for f_key in filter: 
-			print f_key
 			if not obj.has_key(f_key): 
 				return {}
 			else: 

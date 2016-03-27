@@ -18,10 +18,10 @@ class pattern () :
 				return {}
 			else: 
 				if self.type=='or':		
-					if len(list(set(obj[f_key]+filter[f_key]))) == len(obj[f_key])+len(filter[f_key]): 
+					if len(list(set(obj[f_key]+filter[f_key]))) == len(list(set(obj[f_key])))+len(list(set(filter[f_key]))): 
 						return {}
 				elif self.type=='and': 
-					if len(list(set(obj[f_key]+filter[f_key]))) != len(obj[f_key]):
+					if len(list(set(obj[f_key]+filter[f_key]))) != len(list(set(obj[f_key]))):
 						return {}
 		return	obj
 	def __acc__(self,init_value,key,obj): 

@@ -6,10 +6,13 @@ class pattern () :
 	def __init__(self): 
 		self.type='or'	
 		return 
-	def __enumerate__(self,table): 
-		keys=table.keys();
-		keys.sort();
-		return keys
+	def __enumerate__(self,op,target): 
+		return apply(op,[target])
+	def enumerate_dict(self,table): 
+		return self.__enumerate__(lambda x: x,table);
+	def enumerate_dict_pair(self,table):
+		return self.__enumerate__(lambda x: map(lambda a,b:b[a],map(lambda y:y,x))			,table)
+				
 	def __filter__(self,predict,obj): 
 		return apply(predict,[obj])
 	def indentity(self,obj): 

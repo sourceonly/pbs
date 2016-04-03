@@ -10,7 +10,8 @@ filter['Job_Owner']=['pbsadmin@demo']
 res_table={}
 pattern=pattern.pattern();
 
-for i in pattern.__enumerate__(t): 
+print pattern.enumerate_dict_pair(t);
+for i in pattern.enumerate_dict(t): 
 	obj=t[i];
 	res=pattern.__filter__(lambda x:pattern.dict_orvalue_filter(filter,x),obj)
 	res_table=pattern.dict_acc(res_table,i,res);
@@ -23,7 +24,7 @@ print res_table.keys()
 #		return int(obj['Resource_List.ncpus'][0])
 #	return 0
 
-#for i in pattern.__enumerate__(t): 
+#for i in pattern.enumerate_dict(t): 
 #	obj=t[i];
 #	res=pattern.__filter__(lambda x:pattern.dict_orvalue_filter(filter,x),obj)
 #	ncpus=pattern.__acc__(ncpus,lambda x,y:x+y,get_ncpus,i,res);

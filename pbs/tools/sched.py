@@ -1,14 +1,13 @@
 import pbs_tools
 import pattern
 import os
-class snapshot(): 
+class snapshot(pattern.pattern): 
 	def __init__(self): 
 		tools=pbs_tools.pbs_tools()
 		self.job_table=tools.table['job'];
 		self.node_table=tools.table['pbsnodes'];
 		self.init_job_filter();	
 		self.init_node_filter();
-		self.pattern=pattern.pattern();
 	def init_job_filter(self): 
 		self.job_filter={}
 		self.job_filter['queue']=['iworkq']
@@ -35,22 +34,20 @@ class snapshot():
 		t=self.job_table
 		res_table={};
 		filter=self.job_filter;
-		pattern1=self.pattern;
-		for i in pattern1.__enumerate__(t):
+		for i in self.__enumerate__(t):
         		obj=t[i];
-        		res=pattern1.__filter__(lambda x:pattern1.dict_orvalue_filter(filter,x),obj)
-        		res_table=pattern1.dict_acc(res_table,i,res);
+        		res=self.__filter__(lambda x:self.dict_orvalue_filter(filter,x),obj)
+        		res_table=self.dict_acc(res_table,i,res);
 		return res_table	
 	
 	def get_filted_node(self): 
 		t=self.node_table
 		res_table={};
 		filter=self.node_filter;
-		pattern1=self.pattern;
-		for i in pattern1.__enumerate__(t):
+		for i in self.__enumerate__(t):
         		obj=t[i];
-        		res=pattern1.__filter__(lambda x:pattern1.dict_orvalue_filter(filter,x),obj)
-        		res_table=pattern1.dict_acc(res_table,i,res);
+        		res=self.__filter__(lambda x:self.dict_orvalue_filter(filter,x),obj)
+        		res_table=self.dict_acc(res_table,i,res);
 		return res_table	
 		
 	def get_node_obj_free_cpus(self,key,node_obj): 
@@ -59,13 +56,12 @@ class snapshot():
 	       	return 0
 	def get_node_free_cpus(self):
 		t=self.node_table	
-		pattern1=self.pattern
 		filter=self.node_filter
 		ncpus=0
-		for i in pattern1.__enumerate__(t): 
+		for i in self.__enumerate__(t): 
 			obj=t[i];
-	       		res=pattern1.__filter__(lambda x:pattern1.dict_orvalue_filter(filter,x),obj)
-			ncpus=pattern1.__acc__(ncpus,lambda x,y:x+y,self.get_node_obj_free_cpus,i,res);
+	       		res=self.__filter__(lambda x:self.dict_orvalue_filter(filter,x),obj)
+			ncpus=self.__acc__(ncpus,lambda x,y:x+y,self.get_node_obj_free_cpus,i,res);
 		return ncpus
 	
 					

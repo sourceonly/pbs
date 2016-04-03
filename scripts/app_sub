@@ -1,6 +1,6 @@
 #!/bin/bash 
 . /etc/pas.conf
-touch ~/pas_client/default
+touch ~/pas_client_default
 export PAS_CONF_FILE=/etc/pas.conf
 export PATH=$PAS_EXEC/pas-commands/bin:$PATH
 proc_name=$0

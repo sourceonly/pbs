@@ -34,7 +34,7 @@ class snapshot(pattern.pattern):
 		t=self.job_table
 		res_table={};
 		filter=self.job_filter;
-		for i in self.__enumerate__(t):
+		for i in self.enumerate_dict(t):
         		obj=t[i];
         		res=self.__filter__(lambda x:self.dict_orvalue_filter(filter,x),obj)
         		res_table=self.dict_acc(res_table,i,res);
@@ -44,7 +44,7 @@ class snapshot(pattern.pattern):
 		t=self.node_table
 		res_table={};
 		filter=self.node_filter;
-		for i in self.__enumerate__(t):
+		for i in self.enumerate_dict(t):
         		obj=t[i];
         		res=self.__filter__(lambda x:self.dict_orvalue_filter(filter,x),obj)
         		res_table=self.dict_acc(res_table,i,res);
@@ -58,7 +58,7 @@ class snapshot(pattern.pattern):
 		t=self.node_table	
 		filter=self.node_filter
 		ncpus=0
-		for i in self.__enumerate__(t): 
+		for i in self.enumerate_dict(t): 
 			obj=t[i];
 	       		res=self.__filter__(lambda x:self.dict_orvalue_filter(filter,x),obj)
 			ncpus=self.__acc__(ncpus,lambda x,y:x+y,self.get_node_obj_free_cpus,i,res);
@@ -98,7 +98,7 @@ class sched():
 		list_job=to_deliver.keys()
 		list_job.sort() 
 		print list_job
-		job_to_d=list_job.pop(5);
+		job_to_d=list_job.pop(0);
 		print job_to_d
 		
 		cpu_req=self.snapshot.safe_get_int_key("Resource_List.ncpus",to_deliver[job_to_d])

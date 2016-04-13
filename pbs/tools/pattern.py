@@ -49,4 +49,23 @@ class pattern () :
 				return {}
 	
 		return obj
+
+
+import time
+class read_config(pattern): 
+	def __init__(self): 
+		pattern.__init__(self);
+	
+	def set_log_file(self,file='output.log'): 
+		self.logfile=file
+			
 		
+	
+		
+
+
+class logmessage(pattern): 
+	def __init__(self):
+		pattern.__init__(self);
+	def line_message(self,message): 
+		print time.asctime()

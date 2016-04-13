@@ -3,6 +3,7 @@ import pattern
 import os
 class snapshot(pattern.pattern): 
 	def __init__(self): 
+		pattern.pattern.__init__(self);
 		tools=pbs_tools.pbs_tools()
 		self.job_table=tools.table['job'];
 		self.node_table=tools.table['pbsnodes'];
@@ -52,8 +53,11 @@ class snapshot(pattern.pattern):
 		
 	def get_node_obj_free_cpus(self,key,node_obj): 
 		if node_obj.has_key('resources_available.ncpus'):
-               		return int(node_obj['resources_available.ncpus'][0])
-	       	return 0
+               		total_cpus=int(node_obj['resources_available.ncpus'][0])
+			if node_obj.has_key('resources_assigned.ncpus'): 
+				return total_cpus-int(node_obj['resources_assigned.ncpus'][0])
+		return 0
+	
 	def get_node_free_cpus(self):
 		t=self.node_table	
 		filter=self.node_filter
@@ -72,10 +76,13 @@ import subprocess
 
 class sched(): 
 	def __init__(self): 
-		self.sched_cycle=10;
+		self.sched_cycle=5;
 		self.orig_queue=['workq'] 
 		self.dest_queue=['iworkq']
 		self.init_snap()
+	def read_config_file(file): 
+		
+		pass	
 	def init_snap(self): 
 		self.snapshot=snapshot();
 		node_filter={};
@@ -90,26 +97,27 @@ class sched():
 	def move_job(self,destination,jobid): 
 		os.system('qmove ' + destination + ' ' + jobid);
 		time.sleep(1);
+		os.system('qrun ' + jobid );
+		time.sleep(1);
 		self.init_snap();
 	
 	def do_sched(self):
-		snap=self.snapshot 
+		self.init_snap();
 		to_deliver=self.snapshot.get_filted_job()
 		list_job=to_deliver.keys()
 		list_job.sort() 
 		print list_job
+		if len(list_job)==0: 
+			return
 		job_to_d=list_job.pop(0);
+		
 		print job_to_d
-		
 		cpu_req=self.snapshot.safe_get_int_key("Resource_List.ncpus",to_deliver[job_to_d])
-		
 		cpu_free=self.snapshot.get_node_free_cpus()
 		
 		print cpu_req,cpu_free
-				
-		self.move_job(self.dest_queue[0],job_to_d)
-				
-		pass
+		if cpu_req <= cpu_free:
+			self.move_job(self.dest_queue[0],job_to_d)
 	def main_loop(self):	
 		while True: 
 			self.do_sched();

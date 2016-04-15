@@ -198,6 +198,7 @@ class pbs_tools():
 			platform_info.append(platform_string);
 		return platform_info;
 			
+	
 	def qmgr_pn (self, node='@default'): 
 		qmgr_pn=subprocess.Popen(['qmgr','-c','p n @default'],shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 		out,err=qmgr_pn.communicate();
@@ -270,6 +271,17 @@ class RefreshModule() :
                 A=self.pbs_tools;
                 available_platform=A.get_app_platform(apps);
                 options=A.get_platform_status(available_platform); 
+		def get_free_cpus(string): 
+			import re
+			reg=re.compile("free:\s+([0-9]+)")
+			reg_res=reg.search(string);
+			if reg_res: 
+				return int(reg_res.group(1));
+			return 0
+		options_pair=map(lambda x:[x,get_free_cpus(x)],options)
+		options_pair.sort(reverse=True,cmp=lambda x,y: cmp(x[1],y[1]));
+		options=map(lambda x: x[0],options_pair);
+
 
 		old_platform=refreshUtils.getValue(platform)
 		if not old_platform : 

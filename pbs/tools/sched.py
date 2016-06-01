@@ -91,6 +91,7 @@ class sched():
 		job_filter={};
 		job_filter['queue']=self.orig_queue
 		job_filter['job_state']=['Q']
+		job_filter['Resource_List.allow_sched']=['t']
 		self.snapshot.job_filter=job_filter	
 			
 				

@@ -1,6 +1,7 @@
 import pbs_tools
 import pattern
 import os
+import re
 class snapshot(pattern.pattern): 
 	def __init__(self): 
 		pattern.pattern.__init__(self);
@@ -68,6 +69,25 @@ class snapshot(pattern.pattern):
 			ncpus=self.__acc__(ncpus,lambda x,y:x+y,self.get_node_obj_free_cpus,i,res);
 		return ncpus
 	
+	def get_queue_free_cpus(self,queue):
+                all=re.compile("PBS_ALL=([0-9]+)");
+                assign=re.compile("resources_assigned.ncpus = ([0-9]+)")
+                q_re=re.compile("Queued:[1-9]")
+                bf=subprocess.Popen("qstat -Qf %s" % queue, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                out,err=bf.communicate()
+                cpus_all=0
+                cpus_assign=0
+                for i in out.splitlines():
+                        all_res=all.search(i)
+                        assign_res=assign.search(i);
+                        queue_res=q_re.search(i);
+                        if queue_res:
+                                return 0
+                        if all_res:
+                                cpus_all=int(all_res.group(1))
+                        if assign_res:
+                                cpus_assign=int(assign_res.group(1))
+                return cpus_all-cpus_assign;
 					
 				
 import time
@@ -114,8 +134,9 @@ class sched():
 		
 		print job_to_d
 		cpu_req=self.snapshot.safe_get_int_key("Resource_List.ncpus",to_deliver[job_to_d])
-		cpu_free=self.snapshot.get_node_free_cpus()
-		
+#		cpu_free=self.snapshot.get_node_free_cpus()
+		cpu_free=self.snapshot.get_queue_free_cpus(self.dest_queue[0])
+                
 		print cpu_req,cpu_free
 		if cpu_req <= cpu_free:
 			self.move_job(self.dest_queue[0],job_to_d)
